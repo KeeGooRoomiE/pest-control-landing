@@ -151,7 +151,7 @@ The only rule: nothing from the chat goes into the repository. No hardcoded secr
 
 ## Project-specific context
 
-**Project:** pest-control-landing — «ДезГарант», одностраничный лендинг компании по борьбе с вредителями.
+**Project:** pest-control-landing — «QAZ Pest Control», одностраничный лендинг компании по борьбе с вредителями.
 **Stack:** Astro (статическая сборка, Node.js 24+) + Tailwind CSS v4 (`@tailwindcss/vite`) + ванильный TypeScript. Без UI-фреймворка.
 **Entry points:**
 - `src/pages/index.astro` — сборка секций в одну страницу

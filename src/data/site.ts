@@ -2,7 +2,7 @@
 // Replace with client-confirmed final copy/branding when provided.
 
 export const site = {
-  companyName: "ДезГарант",
+  companyName: "QAZ Pest Control",
   legalName: "ТОО «ДезГарант»",
   tagline: "Профессиональная борьба с вредителями",
   phone: "+7 727 310 15 06",
