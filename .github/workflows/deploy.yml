@@ -47,6 +47,43 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  notify:
+    needs: [build, deploy]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify Telegram
+        env:
+          BOT_TOKEN:     ${{ secrets.PIPLINE_BOT_SECRET }}
+          CHAT_ID:       ${{ secrets.CHAT_ID }}
+          BUILD_STATUS:  ${{ needs.build.result }}
+          DEPLOY_STATUS: ${{ needs.deploy.result }}
+          SITE_URL:      ${{ needs.deploy.outputs.page_url }}
+          ACTOR:         ${{ github.actor }}
+          BRANCH:        ${{ github.ref_name }}
+          SHA:           ${{ github.sha }}
+        run: |
+          if [ -z "$BOT_TOKEN" ] || [ -z "$CHAT_ID" ]; then
+            echo "No telegram secrets, skipping notification"
+            exit 0
+          fi
+
+          SHORT_SHA="${SHA:0:7}"
+
+          if [ "$BUILD_STATUS" = "success" ] && [ "$DEPLOY_STATUS" = "success" ]; then
+            TEXT="@${ACTOR}%0A✅ Deployed successfully!%0ABranch: ${BRANCH}%0ACommit: ${SHORT_SHA}%0A🌐 ${SITE_URL}"
+          elif [ "$BUILD_STATUS" != "success" ]; then
+            TEXT="@${ACTOR}%0A❌ Build failed!%0ABranch: ${BRANCH}%0ACommit: ${SHORT_SHA}"
+          else
+            TEXT="@${ACTOR}%0A❌ Deploy failed!%0ABranch: ${BRANCH}%0ACommit: ${SHORT_SHA}"
+          fi
+
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -d chat_id="${CHAT_ID}" \
+            -d text="$TEXT"
