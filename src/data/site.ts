@@ -20,7 +20,6 @@ export const site = {
 };
 
 export const navLinks = [
-  { label: "Главная", href: "#hero" },
   { label: "Продукция", href: "#categories" },
   { label: "Бренды", href: "#brands" },
   { label: "Услуги", href: "#services" },
