@@ -1,0 +1,49 @@
+---
+import Container from "../ui/Container.astro";
+import { site, navLinks } from "../../data/site";
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="bg-brand-navy-dark py-10 text-white/70">
+  <Container class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <div class="flex items-center gap-2">
+        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-brand-green text-white font-bold">Д</div>
+        <span class="font-bold text-white">{site.companyName}</span>
+      </div>
+      <p class="mt-3 text-sm">{site.tagline}</p>
+    </div>
+
+    <div>
+      <p class="mb-3 text-sm font-semibold text-white">Навигация</p>
+      <ul class="space-y-2 text-sm">
+        {navLinks.map((link) => (
+          <li><a href={link.href} class="hover:text-white">{link.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <p class="mb-3 text-sm font-semibold text-white">Контакты</p>
+      <ul class="space-y-2 text-sm">
+        <li><a href={site.phoneHref} class="hover:text-white">{site.phone}</a></li>
+        <li><a href={`mailto:${site.email}`} class="hover:text-white">{site.email}</a></li>
+        <li>{site.address}</li>
+      </ul>
+    </div>
+
+    <div>
+      <p class="mb-3 text-sm font-semibold text-white">Режим работы</p>
+      <ul class="space-y-1 text-sm">
+        {site.hours.map((h) => (
+          <li>{h.days}: {h.time}</li>
+        ))}
+      </ul>
+    </div>
+  </Container>
+
+  <Container class="mt-8 border-t border-white/10 pt-6 text-xs">
+    &copy; {currentYear} {site.legalName}. Все права защищены.
+  </Container>
+</footer>

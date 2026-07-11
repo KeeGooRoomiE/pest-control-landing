@@ -1,0 +1,28 @@
+---
+import Container from "../ui/Container.astro";
+import IconTile from "../ui/IconTile.astro";
+
+const categories = [
+  { label: "Инсектициды", hint: "Концентраты, готовые препараты" },
+  { label: "Родентициды", hint: "Приманки, брикеты, пасты" },
+  { label: "Дезинфекция", hint: "Средства для обработки и дезинфекции" },
+  { label: "Оборудование", hint: "Опрыскиватели, генераторы, распылители" },
+  { label: "Средства защиты", hint: "СИЗ и аксессуары" },
+  { label: "Акции", hint: "Выгодные предложения" },
+];
+---
+
+<section id="categories" class="border-b border-slate-100 py-10">
+  <Container>
+    <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
+      {categories.map((c) => (
+        <IconTile label={c.label} hint={c.hint}>
+          <!-- TODO: заменить на иконку категории, см. .claude/ASSETS.md -->
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+        </IconTile>
+      ))}
+    </div>
+  </Container>
+</section>

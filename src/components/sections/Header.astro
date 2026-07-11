@@ -1,0 +1,36 @@
+---
+import Container from "../ui/Container.astro";
+import Button from "../ui/Button.astro";
+import { site, navLinks } from "../../data/site";
+---
+
+<header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+  <Container class="flex items-center justify-between gap-6 py-3">
+    <a href="#hero" class="flex items-center gap-2 shrink-0">
+      <!-- TODO: заменить на реальный логотип клиента, см. .claude/ASSETS.md -->
+      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-brand-green text-white font-bold">
+        Д
+      </div>
+      <span class="text-lg font-bold leading-tight text-slate-900">
+        {site.companyName}
+        <span class="block text-xs font-medium text-slate-500">PEST CONTROL</span>
+      </span>
+    </a>
+
+    <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-slate-700">
+      {navLinks.map((link) => (
+        <a href={link.href} class="hover:text-brand-green transition-colors">
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="hidden sm:flex items-center gap-3">
+      <a href={site.phoneHref} class="text-right leading-tight">
+        <span class="block text-base font-bold text-slate-900">{site.phone}</span>
+        <span class="block text-xs text-slate-500">Звонок по РК бесплатный</span>
+      </a>
+      <Button href="#contacts" size="md">Получить консультацию</Button>
+    </div>
+  </Container>
+</header>

@@ -1,0 +1,55 @@
+---
+import Container from "../ui/Container.astro";
+import Button from "../ui/Button.astro";
+import CheckItem from "../ui/CheckItem.astro";
+
+const steps = [
+  "Осмотр объекта и выявление проблемы",
+  "Подбор оптимального метода обработки",
+  "Профессиональные препараты и оборудование",
+  "Безопасно для людей и домашних животных",
+  "Гарантия на выполненные работы",
+];
+
+const objects = [
+  "Квартиры и дома",
+  "Офисы и бизнес-центры",
+  "Склады и производства",
+  "Рестораны и кафе",
+  "Гостиницы и отели",
+  "Торговые и учебные заведения",
+];
+---
+
+<section id="services" class="py-14">
+  <Container class="grid gap-10 lg:grid-cols-2 lg:items-center">
+    <div class="relative">
+      <!-- TODO: заменить на фото специалиста на объекте, см. .claude/ASSETS.md -->
+      <div class="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-brand-gray text-slate-400">
+        Фото обработки объекта (заглушка)
+      </div>
+    </div>
+
+    <div>
+      <p class="text-sm font-bold uppercase tracking-wide text-brand-red">Профессиональная дезинсекция</p>
+      <h2 class="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
+        Надёжная защита от вредителей с гарантией результата
+      </h2>
+
+      <ul class="mt-6 space-y-3 text-slate-700">
+        {steps.map((s) => <CheckItem>{s}</CheckItem>)}
+      </ul>
+
+      <div class="mt-6 rounded-xl bg-brand-gray p-5">
+        <p class="mb-3 text-sm font-semibold text-slate-900">Обрабатываем объекты:</p>
+        <ul class="grid grid-cols-1 gap-2 text-sm text-slate-600 sm:grid-cols-2">
+          {objects.map((o) => <li>• {o}</li>)}
+        </ul>
+      </div>
+
+      <Button href="#contacts" variant="danger" size="lg" class="mt-6">
+        Заказать обработку
+      </Button>
+    </div>
+  </Container>
+</section>

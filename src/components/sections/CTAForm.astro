@@ -1,0 +1,160 @@
+---
+import Container from "../ui/Container.astro";
+import Button from "../ui/Button.astro";
+import { site } from "../../data/site";
+
+const objectTypes = ["Квартира/дом", "Офис", "Склад/производство", "Ресторан/кафе", "Другое"];
+---
+
+<section id="contacts" class="bg-brand-navy py-16 text-white">
+  <Container class="grid gap-10 lg:grid-cols-2">
+    <div>
+      <p class="text-sm font-semibold uppercase tracking-wide text-white/70">Контакты</p>
+      <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Оставьте заявку — перезвоним и подберём решение</h2>
+      <p class="mt-3 text-white/70">
+        Заполните форму, и мы свяжемся с вами для уточнения деталей и расчёта стоимости обработки.
+      </p>
+
+      <dl class="mt-8 space-y-4 text-sm">
+        <div>
+          <dt class="text-white/50">Телефон</dt>
+          <dd><a href={site.phoneHref} class="text-lg font-semibold">{site.phone}</a></dd>
+        </div>
+        <div>
+          <dt class="text-white/50">Email</dt>
+          <dd><a href={`mailto:${site.email}`} class="font-semibold">{site.email}</a></dd>
+        </div>
+        <div>
+          <dt class="text-white/50">Адрес</dt>
+          <dd class="font-semibold">{site.address}</dd>
+        </div>
+        <div>
+          <dt class="text-white/50">Режим работы</dt>
+          <dd class="font-semibold">
+            {site.hours.map((h) => (
+              <span class="mr-3 inline-block">{h.days}: {h.time}</span>
+            ))}
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <form data-lead-form class="rounded-2xl bg-white p-6 text-slate-800 shadow-lg sm:p-8">
+      <div class="grid gap-4">
+        <label class="block text-sm font-medium">
+          Имя
+          <input
+            type="text"
+            name="name"
+            required
+            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-green focus:outline-none"
+          />
+        </label>
+
+        <label class="block text-sm font-medium">
+          Телефон
+          <input
+            type="tel"
+            name="phone"
+            required
+            placeholder="+7 ___ ___ __ __"
+            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-green focus:outline-none"
+          />
+        </label>
+
+        <label class="block text-sm font-medium">
+          Тип объекта
+          <select
+            name="objectType"
+            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-green focus:outline-none"
+          >
+            {objectTypes.map((t) => <option value={t}>{t}</option>)}
+          </select>
+        </label>
+
+        <label class="block text-sm font-medium">
+          Комментарий
+          <textarea
+            name="comment"
+            rows="3"
+            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-green focus:outline-none"
+          ></textarea>
+        </label>
+
+        <label class="flex items-start gap-2 text-xs text-slate-500">
+          <input type="checkbox" name="consent" required class="mt-0.5" />
+          Даю согласие на обработку персональных данных
+        </label>
+
+        <Button type="submit" size="lg" class="w-full">Отправить заявку</Button>
+
+        <p data-lead-form-status class="text-sm" role="status" aria-live="polite"></p>
+      </div>
+    </form>
+  </Container>
+</section>
+
+<script>
+  import { GITHUB_DISPATCH_REPO, GITHUB_DISPATCH_EVENT_TYPE } from "../../config/leadForm";
+
+  // Подставляется Vite/Astro из переменной окружения PUBLIC_GITHUB_DISPATCH_TOKEN
+  // на этапе сборки (см. .github/workflows/deploy.yml). Читаем через runtime-геттер,
+  // а не как статический импортированный литерал — иначе минификатор при пустом
+  // значении в локальной сборке гарантированно докажет "токена нет" и вырежет
+  // рабочую ветку кода на этапе сборки, ещё до того, как токен попадёт в бандл.
+  const getDispatchToken = () => import.meta.env.PUBLIC_GITHUB_DISPATCH_TOKEN ?? "";
+
+  const form = document.querySelector<HTMLFormElement>("[data-lead-form]");
+  const status = document.querySelector<HTMLElement>("[data-lead-form-status]");
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!status) return;
+
+    const token = getDispatchToken();
+    if (!token) {
+      status.textContent = "Форма ещё не подключена к отправке (нет токена). Свяжитесь с нами по телефону.";
+      status.className = "text-sm text-brand-red";
+      return;
+    }
+
+    const data = new FormData(form);
+    const submitButton = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    submitButton?.setAttribute("disabled", "true");
+    status.textContent = "Отправляем заявку…";
+    status.className = "text-sm text-slate-500";
+
+    try {
+      const response = await fetch(`https://api.github.com/repos/${GITHUB_DISPATCH_REPO}/dispatches`, {
+        method: "POST",
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          event_type: GITHUB_DISPATCH_EVENT_TYPE,
+          client_payload: {
+            name: data.get("name"),
+            phone: data.get("phone"),
+            objectType: data.get("objectType"),
+            comment: data.get("comment"),
+            submittedAt: new Date().toISOString(),
+          },
+        }),
+      });
+
+      if (!response.ok) throw new Error(`GitHub API responded ${response.status}`);
+
+      status.textContent = "Заявка отправлена! Мы свяжемся с вами в ближайшее время.";
+      status.className = "text-sm text-brand-green";
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      status.textContent = "Не удалось отправить заявку. Позвоните нам напрямую.";
+      status.className = "text-sm text-brand-red";
+    } finally {
+      submitButton?.removeAttribute("disabled");
+    }
+  });
+</script>

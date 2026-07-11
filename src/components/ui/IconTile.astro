@@ -1,0 +1,17 @@
+---
+interface Props {
+  label: string;
+  hint?: string;
+  class?: string;
+}
+
+const { label, hint, class: className = "" } = Astro.props;
+---
+
+<div class:list={["flex flex-col items-center gap-2 text-center", className]}>
+  <div class="flex h-14 w-14 items-center justify-center rounded-full bg-brand-green/10 text-brand-green">
+    <slot />
+  </div>
+  <p class="text-sm font-semibold text-slate-800">{label}</p>
+  {hint && <p class="text-xs text-slate-500">{hint}</p>}
+</div>

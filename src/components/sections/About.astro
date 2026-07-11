@@ -1,0 +1,38 @@
+---
+import Container from "../ui/Container.astro";
+import IconTile from "../ui/IconTile.astro";
+import { site } from "../../data/site";
+
+const trustPoints = [
+  "Опытные специалисты",
+  "Сертифицированные препараты",
+  "Индивидуальный подход",
+  "Конфиденциальность гарантирована",
+  "Гарантия на работы",
+];
+---
+
+<section id="about" class="py-14">
+  <Container>
+    <div class="mx-auto max-w-3xl text-center">
+      <p class="text-sm font-semibold uppercase tracking-wide text-brand-green">О компании</p>
+      <h2 class="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
+        {site.legalName} — на рынке с {site.sinceYear} года
+      </h2>
+      <p class="mt-4 text-slate-600">
+        Работаем с собственной профессиональной химией и приложим все усилия, чтобы решить вашу проблему
+        с вредителями. Гарантируем позитивный опыт сотрудничества.
+      </p>
+    </div>
+
+    <div class="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-5">
+      {trustPoints.map((label) => (
+        <IconTile label={label}>
+          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l2.25 2.25 4.5-4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </IconTile>
+      ))}
+    </div>
+  </Container>
+</section>

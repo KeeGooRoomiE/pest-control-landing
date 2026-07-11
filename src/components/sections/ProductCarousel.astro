@@ -1,0 +1,75 @@
+---
+import Container from "../ui/Container.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+import Card from "../ui/Card.astro";
+
+// TODO: заменить плейсхолдеры на реальный список используемых компанией продуктов/оборудования.
+const items = [
+  { name: "Инсектицидный концентрат" },
+  { name: "Родентицидная приманка" },
+  { name: "Гель от тараканов" },
+  { name: "Профессиональный опрыскиватель" },
+  { name: "Генератор холодного тумана" },
+  { name: "Средства индивидуальной защиты" },
+  { name: "Ловушки для грызунов" },
+  { name: "Дезинфицирующий раствор" },
+];
+---
+
+<section class="py-14">
+  <Container>
+    <SectionHeading
+      eyebrow="Что мы используем"
+      title="Продукция, с которой мы работаем"
+      subtitle="Витрина оригинальных препаратов и оборудования, применяемых нашими специалистами. Не является каталогом для заказа."
+    />
+
+    <div class="relative mt-8 overflow-hidden" data-carousel>
+      <div class="flex gap-4" data-carousel-track>
+        {[...items, ...items].map((item) => (
+          <Card class="flex w-56 shrink-0 flex-col items-center gap-3 p-5 text-center">
+            <!-- TODO: заменить на фото продукта, см. .claude/ASSETS.md -->
+            <div class="flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400">
+              Фото
+            </div>
+            <p class="text-sm font-semibold text-slate-800">{item.name}</p>
+          </Card>
+        ))}
+      </div>
+    </div>
+  </Container>
+</section>
+
+<script>
+  const ADVANCE_MS = 5500;
+
+  function initCarousel(root: HTMLElement) {
+    const track = root.querySelector<HTMLElement>("[data-carousel-track]");
+    if (!track) return;
+
+    const cards = Array.from(track.children) as HTMLElement[];
+    const half = cards.length / 2;
+    let index = 0;
+
+    const step = () => {
+      index += 1;
+      const card = cards[index];
+      if (!card) return;
+
+      track.style.transition = "transform 0.6s ease";
+      track.style.transform = `translateX(-${card.offsetLeft}px)`;
+
+      if (index >= half) {
+        window.setTimeout(() => {
+          track.style.transition = "none";
+          index = 0;
+          track.style.transform = "translateX(0px)";
+        }, 650);
+      }
+    };
+
+    window.setInterval(step, ADVANCE_MS);
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-carousel]").forEach(initCarousel);
+</script>

@@ -1,0 +1,20 @@
+---
+import Container from "../ui/Container.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
+
+// TODO: заменить на реальный список брендов-партнёров и их логотипы, см. .claude/ASSETS.md
+const brands = ["Bayer", "Syngenta", "BASF", "Sumitomo Chemical", "FMC", "Nisso", "UPL"];
+---
+
+<section id="brands" class="border-y border-slate-100 bg-brand-gray py-12">
+  <Container>
+    <SectionHeading title="Мы работаем с лучшими брендами" align="center" />
+    <div class="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
+      {brands.map((brand) => (
+        <div class="flex h-12 w-32 items-center justify-center rounded-md border border-slate-200 bg-white text-xs font-semibold text-slate-400">
+          {brand}
+        </div>
+      ))}
+    </div>
+  </Container>
+</section>

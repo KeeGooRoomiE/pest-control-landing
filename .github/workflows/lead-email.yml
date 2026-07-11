@@ -1,0 +1,28 @@
+name: Send lead email
+
+on:
+  repository_dispatch:
+    types: [lead-form-submitted]
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send email via client's SMTP
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          from: ${{ secrets.SMTP_USERNAME }}
+          to: in4qpc@gmail.com
+          subject: "Новая заявка с сайта — ${{ github.event.client_payload.name }}"
+          body: |
+            Новая заявка с лендинга ДезГарант.
+
+            Имя: ${{ github.event.client_payload.name }}
+            Телефон: ${{ github.event.client_payload.phone }}
+            Тип объекта: ${{ github.event.client_payload.objectType }}
+            Комментарий: ${{ github.event.client_payload.comment }}
+            Отправлено: ${{ github.event.client_payload.submittedAt }}
