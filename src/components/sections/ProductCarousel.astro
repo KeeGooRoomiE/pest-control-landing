@@ -3,16 +3,65 @@ import Container from "../ui/Container.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
 import Card from "../ui/Card.astro";
 
-// TODO: заменить плейсхолдеры на реальный список используемых компанией продуктов/оборудования.
+// TODO: заменить плейсхолдеры (включая price/description) на реальный список
+// используемых компанией продуктов/оборудования.
 const items = [
-  { name: "Инсектицидный концентрат" },
-  { name: "Родентицидная приманка" },
-  { name: "Гель от тараканов" },
-  { name: "Профессиональный опрыскиватель" },
-  { name: "Генератор холодного тумана" },
-  { name: "Средства индивидуальной защиты" },
-  { name: "Ловушки для грызунов" },
-  { name: "Дезинфицирующий раствор" },
+  {
+    id: "insekt-koncentrat",
+    name: "Инсектицидный концентрат",
+    price: "Цена по запросу",
+    description:
+      "Профессиональный концентрат для обработки от тараканов, клопов и других ползающих насекомых. Экономичный расход, длительное остаточное действие.",
+  },
+  {
+    id: "rodenticidnaya-primanka",
+    name: "Родентицидная приманка",
+    price: "Цена по запросу",
+    description:
+      "Готовая к применению приманка для уничтожения крыс и мышей. Используется в жилых, складских и производственных помещениях.",
+  },
+  {
+    id: "gel-ot-tarakanov",
+    name: "Гель от тараканов",
+    price: "Цена по запросу",
+    description:
+      "Инсектицидный гель точечного нанесения. Действует на всю колонию за счёт эффекта домино, безопасен при точечном применении.",
+  },
+  {
+    id: "professionalnyj-opryskivatel",
+    name: "Профессиональный опрыскиватель",
+    price: "Цена по запросу",
+    description:
+      "Ранцевый опрыскиватель для нанесения рабочих растворов инсектицидов и дезинфектантов на больших площадях.",
+  },
+  {
+    id: "generator-holodnogo-tumana",
+    name: "Генератор холодного тумана",
+    price: "Цена по запросу",
+    description:
+      "Оборудование для мелкодисперсного распыления препаратов методом холодного тумана — для дезинсекции и дезинфекции труднодоступных мест.",
+  },
+  {
+    id: "sredstva-individualnoj-zashhity",
+    name: "Средства индивидуальной защиты",
+    price: "Цена по запросу",
+    description:
+      "Комплект СИЗ для специалистов: респиратор, перчатки, защитный костюм — для безопасной работы с профессиональной химией.",
+  },
+  {
+    id: "lovushki-dlya-gryzunov",
+    name: "Ловушки для грызунов",
+    price: "Цена по запросу",
+    description:
+      "Механические и клеевые ловушки для контроля и уничтожения грызунов без применения химических препаратов.",
+  },
+  {
+    id: "dezinficiruyushhij-rastvor",
+    name: "Дезинфицирующий раствор",
+    price: "Цена по запросу",
+    description:
+      "Дезинфицирующее средство широкого спектра действия для обработки поверхностей в жилых и коммерческих помещениях.",
+  },
 ];
 ---
 
@@ -27,17 +76,63 @@ const items = [
     <div class="relative mt-8 overflow-hidden" data-carousel>
       <div class="flex gap-4" data-carousel-track>
         {[...items, ...items].map((item) => (
-          <Card class="flex w-56 shrink-0 flex-col items-center gap-3 p-5 text-center">
+          <Card
+            class="flex w-56 shrink-0 cursor-pointer flex-col items-center gap-3 p-5 text-center"
+            role="button"
+            tabindex="0"
+            aria-haspopup="dialog"
+            data-open-modal={item.id}
+          >
             <!-- TODO: заменить на фото продукта, см. .claude/ASSETS.md -->
             <div class="flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400">
               Фото
             </div>
             <p class="text-sm font-semibold text-slate-800">{item.name}</p>
+            <p class="text-xs font-medium text-brand-green">{item.price}</p>
           </Card>
         ))}
       </div>
     </div>
   </Container>
+
+  {items.map((item) => (
+    <div
+      id={`product-modal-${item.id}`}
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 p-4"
+      data-product-modal
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={`product-modal-${item.id}-title`}
+    >
+      <div class="relative w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-xl">
+        <button
+          type="button"
+          class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-800"
+          data-modal-close
+          aria-label="Закрыть"
+        >
+          &#10005;
+        </button>
+
+        <div class="grid gap-6 p-6 sm:grid-cols-2 sm:p-8">
+          <div class="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
+            <!-- TODO: заменить на фото продукта, см. .claude/ASSETS.md -->
+            <div class="flex h-48 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-sm text-slate-400">
+              Фото
+            </div>
+            <p id={`product-modal-${item.id}-title`} class="text-lg font-semibold text-slate-900">
+              {item.name}
+            </p>
+            <p class="text-sm font-medium text-brand-green">{item.price}</p>
+          </div>
+
+          <div class="flex flex-col justify-center">
+            <p class="text-sm leading-relaxed text-slate-600">{item.description}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))}
 </section>
 
 <script>
@@ -72,4 +167,46 @@ const items = [
   }
 
   document.querySelectorAll<HTMLElement>("[data-carousel]").forEach(initCarousel);
+
+  function openModal(modal: HTMLElement) {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+    document.body.style.overflow = "hidden";
+    modal.querySelector<HTMLElement>("[data-modal-close]")?.focus();
+  }
+
+  function closeModal(modal: HTMLElement) {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+    document.body.style.overflow = "";
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-open-modal]").forEach((trigger) => {
+    const id = trigger.dataset.openModal;
+    if (!id) return;
+    const modal = document.getElementById(`product-modal-${id}`);
+    if (!modal) return;
+
+    trigger.addEventListener("click", () => openModal(modal));
+    trigger.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openModal(modal);
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLElement>("[data-product-modal]").forEach((modal) => {
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeModal(modal);
+    });
+    modal.querySelector("[data-modal-close]")?.addEventListener("click", () => closeModal(modal));
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    document.querySelectorAll<HTMLElement>("[data-product-modal]").forEach((modal) => {
+      if (!modal.classList.contains("hidden")) closeModal(modal);
+    });
+  });
 </script>
