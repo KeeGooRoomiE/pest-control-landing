@@ -1,8 +1,16 @@
 ---
+import { Image } from "astro:assets";
 import Container from "../ui/Container.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
 import Card from "../ui/Card.astro";
 import products from "../../data/products.json";
+
+const groceryImages = import.meta.glob<{ default: ImageMetadata }>(
+  "../../assets/groceries/*",
+  { eager: true },
+);
+const getImage = (item: (typeof products)[number]) =>
+  item.image ? groceryImages[`../../assets/groceries/${item.image}`]?.default : undefined;
 
 const priceFormatter = new Intl.NumberFormat("ru-RU");
 const formatPrice = (item: (typeof products)[number]) =>
@@ -29,10 +37,19 @@ const items = products;
             aria-haspopup="dialog"
             data-open-modal={item.id}
           >
-            <!-- TODO: заменить на фото продукта, см. .claude/ASSETS.md -->
-            <div class="flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400">
-              Фото
-            </div>
+            {getImage(item) ? (
+              <Image
+                src={getImage(item)!}
+                alt={item.name}
+                width={224}
+                height={128}
+                class="h-32 w-full rounded-lg object-contain"
+              />
+            ) : (
+              <div class="flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400">
+                Фото
+              </div>
+            )}
             <p class="text-sm font-semibold text-slate-800">{item.name}</p>
             <p class="text-xs font-medium text-brand-green">{formatPrice(item)}</p>
           </Card>
@@ -62,10 +79,19 @@ const items = products;
 
         <div class="grid gap-6 p-6 pt-0 sm:grid-cols-2 sm:p-8 sm:pt-0">
           <div class="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
-            <!-- TODO: заменить на фото продукта, см. .claude/ASSETS.md -->
-            <div class="flex h-48 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-sm text-slate-400">
-              Фото
-            </div>
+            {getImage(item) ? (
+              <Image
+                src={getImage(item)!}
+                alt={item.name}
+                width={400}
+                height={300}
+                class="h-48 w-full rounded-lg object-contain"
+              />
+            ) : (
+              <div class="flex h-48 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-sm text-slate-400">
+                Фото
+              </div>
+            )}
             <p id={`product-modal-${item.id}-title`} class="text-lg font-semibold text-slate-900">
               {item.name}
             </p>
