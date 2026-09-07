@@ -2,13 +2,39 @@
 import Container from "../ui/Container.astro";
 import IconTile from "../ui/IconTile.astro";
 
+// Иконки — Lucide (MIT), контур наследует цвет через currentColor,
+// см. IconTile.astro (text-brand-green).
 const categories = [
-  { label: "Инсектициды", hint: "Концентраты, готовые препараты" },
-  { label: "Родентициды", hint: "Приманки, брикеты, пасты" },
-  { label: "Дезинфекция", hint: "Средства для обработки и дезинфекции" },
-  { label: "Оборудование", hint: "Опрыскиватели, генераторы, распылители" },
-  { label: "Средства защиты", hint: "СИЗ и аксессуары" },
-  { label: "Акции", hint: "Выгодные предложения" },
+  {
+    label: "Инсектициды",
+    hint: "Концентраты, готовые препараты",
+    icon: `<path d="M12 20v-9" /><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z" /><path d="M14.12 3.88 16 2" /><path d="M21 21a4 4 0 0 0-3.81-4" /><path d="M21 5a4 4 0 0 1-3.55 3.97" /><path d="M22 13h-4" /><path d="M3 21a4 4 0 0 1 3.81-4" /><path d="M3 5a4 4 0 0 0 3.55 3.97" /><path d="M6 13H2" /><path d="m8 2 1.88 1.88" /><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13" />`,
+  },
+  {
+    label: "Родентициды",
+    hint: "Приманки, брикеты, пасты",
+    icon: `<path d="M13 22H4a2 2 0 0 1 0-4h12" /><path d="M13.236 18a3 3 0 0 0-2.2-5" /><path d="M16 9h.01" /><path d="M16.82 3.94a3 3 0 1 1 3.237 4.868l1.815 2.587a1.5 1.5 0 0 1-1.5 2.1l-2.872-.453a3 3 0 0 0-3.5 3" /><path d="M17 4.988a3 3 0 1 0-5.2 2.052A7 7 0 0 0 4 14.015 4 4 0 0 0 8 18" />`,
+  },
+  {
+    label: "Дезинфекция",
+    hint: "Средства для обработки и дезинфекции",
+    icon: `<path d="M3 3h.01" /><path d="M7 5h.01" /><path d="M11 7h.01" /><path d="M3 7h.01" /><path d="M7 9h.01" /><path d="M3 11h.01" /><rect width="4" height="4" x="15" y="5" /><path d="m19 9 2 2v10c0 .6-.4 1-1 1h-6c-.6 0-1-.4-1-1V11l2-2" /><path d="m13 14 8-2" /><path d="m13 19 8-2" />`,
+  },
+  {
+    label: "Оборудование",
+    hint: "Опрыскиватели, генераторы, распылители",
+    icon: `<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z" />`,
+  },
+  {
+    label: "Средства защиты",
+    hint: "СИЗ и аксессуары",
+    icon: `<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /><path d="m9 12 2 2 4-4" />`,
+  },
+  {
+    label: "Акции",
+    hint: "Выгодные предложения",
+    icon: `<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" /><path d="m15 9-6 6" /><path d="M9 9h.01" /><path d="M15 15h.01" />`,
+  },
 ];
 ---
 
@@ -17,10 +43,17 @@ const categories = [
     <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
       {categories.map((c) => (
         <IconTile label={c.label} hint={c.hint}>
-          <!-- TODO: заменить на иконку категории, см. .claude/ASSETS.md -->
-          <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" />
-          </svg>
+          <svg
+            class="h-6 w-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            set:html={c.icon}
+          />
         </IconTile>
       ))}
     </div>
