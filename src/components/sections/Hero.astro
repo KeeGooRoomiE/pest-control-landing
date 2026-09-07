@@ -1,7 +1,9 @@
 ---
+import { Image } from "astro:assets";
 import Container from "../ui/Container.astro";
 import Button from "../ui/Button.astro";
 import CheckItem from "../ui/CheckItem.astro";
+import productsLineup from "../../assets/hero/products-lineup.jpg";
 
 const features = [
   "Эффективность, проверенная временем",
@@ -30,10 +32,13 @@ const features = [
     </div>
 
     <div class="relative">
-      <!-- TODO: заменить на фото товаров клиента, см. .claude/ASSETS.md -->
-      <div class="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-white text-slate-400">
-        Изображение товаров (заглушка)
-      </div>
+      <Image
+        src={productsLineup}
+        alt="Линейка продукции QAZ Pest Control"
+        width={1280}
+        height={918}
+        class="aspect-[4/3] w-full rounded-2xl object-cover"
+      />
     </div>
   </Container>
 </section>

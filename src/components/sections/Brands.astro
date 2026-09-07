@@ -2,8 +2,25 @@
 import Container from "../ui/Container.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
 
-// TODO: заменить на реальный список брендов-партнёров и их логотипы, см. .claude/ASSETS.md
-const brands = ["Bayer", "Syngenta", "BASF", "Sumitomo Chemical", "FMC", "Nisso", "UPL"];
+// Логотипы — официальные бренд-марки, взятые с Wikimedia Commons /
+// Wikipedia (см. src/assets/brands/). Список брендов можно расширять,
+// просто добавляя { name, file } и сам файл в src/assets/brands/.
+const brandImages = import.meta.glob<{ default: string }>(
+  "../../assets/brands/*",
+  { eager: true, query: "?url", import: "default" },
+);
+
+const brands = [
+  { name: "Bayer", file: "bayer.svg" },
+  { name: "Syngenta", file: "syngenta.svg" },
+  { name: "BASF", file: "basf.svg" },
+  { name: "Sumitomo Chemical", file: "sumitomo_chemical.svg" },
+  { name: "FMC", file: "fmc.svg" },
+  { name: "Nisso", file: "nisso.svg" },
+  { name: "UPL", file: "upl.svg" },
+];
+
+const getLogoUrl = (file: string) => brandImages[`../../assets/brands/${file}`];
 ---
 
 <section id="brands" class="border-y border-slate-100 bg-brand-gray py-12">
@@ -11,8 +28,13 @@ const brands = ["Bayer", "Syngenta", "BASF", "Sumitomo Chemical", "FMC", "Nisso"
     <SectionHeading title="Мы работаем с лучшими брендами" align="center" />
     <div class="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
       {brands.map((brand) => (
-        <div class="flex h-12 w-32 items-center justify-center rounded-md border border-slate-200 bg-white text-xs font-semibold text-slate-400">
-          {brand}
+        <div class="flex h-16 w-36 items-center justify-center rounded-md border border-slate-200 bg-white p-3">
+          <img
+            src={getLogoUrl(brand.file)}
+            alt={brand.name}
+            class="max-h-full max-w-full object-contain"
+            loading="lazy"
+          />
         </div>
       ))}
     </div>
