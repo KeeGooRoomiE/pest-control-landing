@@ -1,7 +1,9 @@
 ---
+import { Image } from "astro:assets";
 import Container from "../ui/Container.astro";
 import Button from "../ui/Button.astro";
 import CheckItem from "../ui/CheckItem.astro";
+import treatmentPhoto from "../../assets/services/treatment.jpg";
 
 const steps = [
   "Осмотр объекта и выявление проблемы",
@@ -24,10 +26,13 @@ const objects = [
 <section id="services" class="py-14">
   <Container class="grid gap-10 lg:grid-cols-2 lg:items-center">
     <div class="relative">
-      <!-- TODO: заменить на фото специалиста на объекте, см. .claude/ASSETS.md -->
-      <div class="flex aspect-[4/3] w-full items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-brand-gray text-slate-400">
-        Фото обработки объекта (заглушка)
-      </div>
+      <Image
+        src={treatmentPhoto}
+        alt="Специалист проводит обработку объекта от вредителей"
+        width={739}
+        height={415}
+        class="aspect-[4/3] w-full rounded-2xl object-cover"
+      />
     </div>
 
     <div>
