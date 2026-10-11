@@ -33,7 +33,7 @@ const trustPoints = [
     <div class="mx-auto max-w-3xl text-center">
       <p class="text-sm font-semibold uppercase tracking-wide text-brand-green">О компании</p>
       <h2 class="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
-        {site.legalName} — на рынке с {site.sinceYear} года
+        {site.legalName}{site.sinceYear ? ` — на рынке с ${site.sinceYear} года` : ""}
       </h2>
       <p class="mt-4 text-slate-600">
         Работаем с собственной профессиональной химией и приложим все усилия, чтобы решить вашу проблему

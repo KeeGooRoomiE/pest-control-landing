@@ -1,9 +1,9 @@
-// Placeholder content pulled from https://dezgarant.kz/ per client's OK on 2026-07-11.
-// Replace with client-confirmed final copy/branding when provided.
+// Контакты, адрес, часы работы и юрлицо подтверждены клиентом (2026-10-11).
+// email — всё ещё плейсхолдер, ждём настоящий адрес. Инстаграма у компании нет.
 
 export const site = {
   companyName: "QAZ Pest Control",
-  legalName: "ТОО «ДезГарант»",
+  legalName: "ТОО «Yand Company»",
   tagline: "Профессиональная борьба с вредителями",
   phone: "+7 705-763-49-69",
   phoneHref: "tel:+77057634969",
@@ -13,8 +13,8 @@ export const site = {
     { days: "Пн–Пт", time: "9:00–18:00" },
     { days: "Сб, Вс", time: "выходной" },
   ],
-  instagram: "https://instagram.com/dezgarant_almaty",
-  sinceYear: 2012,
+  // Год основания — уточнить у клиента; пока null, фраза "на рынке с N года" не показывается.
+  sinceYear: null as number | null,
   leadEmailTarget: "in4qpc@gmail.com",
 };
 
