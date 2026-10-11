@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # internal working notes, not for the repo
 .claude/
+
+# python bot
+__pycache__/
+bot/.venv/
