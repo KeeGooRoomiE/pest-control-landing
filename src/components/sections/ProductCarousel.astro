@@ -5,6 +5,7 @@ import SectionHeading from "../ui/SectionHeading.astro";
 import Card from "../ui/Card.astro";
 import Button from "../ui/Button.astro";
 import products from "../../data/products.json";
+import { orderLink } from "../../config/bot";
 
 const groceryImages = import.meta.glob<{ default: ImageMetadata }>(
   "../../assets/groceries/*",
@@ -71,13 +72,7 @@ const arrowClass =
                 <p class="text-sm font-semibold text-slate-800">{item.name}</p>
                 <p class="text-xs font-medium text-brand-green">{formatPrice(item)}</p>
               </div>
-              <Button
-                type="button"
-                class="mt-auto w-full"
-                data-order={item.id}
-                data-product-name={item.name}
-                data-product-price={formatPrice(item)}
-              >
+              <Button href={orderLink(item.id)} target="_blank" rel="noopener" class="mt-auto w-full">
                 Заказать
               </Button>
             </Card>
@@ -125,14 +120,7 @@ const arrowClass =
               {item.name}
             </p>
             <p class="text-sm font-medium text-brand-green">{formatPrice(item)}</p>
-            <Button
-              type="button"
-              size="lg"
-              class="w-full"
-              data-order={item.id}
-              data-product-name={item.name}
-              data-product-price={formatPrice(item)}
-            >
+            <Button href={orderLink(item.id)} target="_blank" rel="noopener" size="lg" class="w-full">
               Заказать
             </Button>
           </div>
@@ -304,29 +292,5 @@ const arrowClass =
     document.querySelectorAll<HTMLElement>("[data-product-modal]").forEach((modal) => {
       if (!modal.classList.contains("hidden")) closeModal(modal);
     });
-  });
-
-  // TODO: заказ через бота — подключим сюда. Пока кнопка «Заказать» закрывает модалку,
-  // подставляет товар в комментарий формы заявки и прокручивает к форме.
-  function handleOrder(button: HTMLElement) {
-    const name = button.dataset.productName ?? "";
-    const price = button.dataset.productPrice ?? "";
-
-    document.querySelectorAll<HTMLElement>("[data-product-modal]").forEach((modal) => {
-      if (!modal.classList.contains("hidden")) closeModal(modal);
-    });
-
-    const form = document.querySelector<HTMLFormElement>("[data-lead-form]");
-    const comment = form?.querySelector<HTMLTextAreaElement>('textarea[name="comment"]');
-    if (comment) comment.value = `Хочу заказать: ${name}${price ? ` (${price})` : ""}`;
-
-    document.getElementById("contacts")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.setTimeout(() => {
-      form?.querySelector<HTMLInputElement>('input[name="name"]')?.focus({ preventScroll: true });
-    }, 600);
-  }
-
-  document.querySelectorAll<HTMLElement>("[data-order]").forEach((button) => {
-    button.addEventListener("click", () => handleOrder(button));
   });
 </script>
