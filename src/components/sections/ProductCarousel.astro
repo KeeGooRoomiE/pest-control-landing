@@ -3,6 +3,7 @@ import { Image } from "astro:assets";
 import Container from "../ui/Container.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
 import Card from "../ui/Card.astro";
+import Button from "../ui/Button.astro";
 import products from "../../data/products.json";
 
 const groceryImages = import.meta.glob<{ default: ImageMetadata }>(
@@ -17,6 +18,9 @@ const formatPrice = (item: (typeof products)[number]) =>
   `${priceFormatter.format(item.price)} ₸`;
 
 const items = products;
+
+const arrowClass =
+  "absolute top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-colors hover:bg-white hover:text-brand-green";
 ---
 
 <section class="py-14">
@@ -27,33 +31,58 @@ const items = products;
       subtitle="Витрина оригинальных препаратов и оборудования, применяемых нашими специалистами. Не является каталогом для заказа."
     />
 
-    <div class="relative mt-8 overflow-hidden" data-carousel>
-      <div class="flex gap-4" data-carousel-track>
-        {[...items, ...items].map((item) => (
-          <Card
-            class="flex w-56 shrink-0 cursor-pointer flex-col items-center gap-3 p-5 text-center"
-            role="button"
-            tabindex="0"
-            aria-haspopup="dialog"
-            data-open-modal={item.id}
-          >
-            {getImage(item) ? (
-              <Image
-                src={getImage(item)!}
-                alt={item.name}
-                width={224}
-                height={128}
-                class="h-32 w-full rounded-lg object-contain"
-              />
-            ) : (
-              <div class="flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400">
-                Фото
+    <div class="relative mt-8" data-carousel>
+      <button type="button" class:list={[arrowClass, "left-2"]} data-carousel-prev aria-label="Предыдущие товары">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+      </button>
+      <button type="button" class:list={[arrowClass, "right-2"]} data-carousel-next aria-label="Следующие товары">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
+      </button>
+
+      <div class="overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" data-carousel-viewport>
+        <div class="flex w-max select-none gap-4" data-carousel-track>
+          {[...items, ...items].map((item) => (
+            <Card class="flex w-56 shrink-0 flex-col items-center gap-3 p-5 text-center">
+              <div
+                role="button"
+                tabindex="0"
+                aria-haspopup="dialog"
+                data-open-modal={item.id}
+                class="flex w-full cursor-pointer flex-col items-center gap-3"
+              >
+                {getImage(item) ? (
+                  <Image
+                    src={getImage(item)!}
+                    alt={item.name}
+                    width={224}
+                    height={128}
+                    draggable="false"
+                    class="h-32 w-full rounded-lg object-contain"
+                  />
+                ) : (
+                  <div class="flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400">
+                    Фото
+                  </div>
+                )}
+                <p class="text-sm font-semibold text-slate-800">{item.name}</p>
+                <p class="text-xs font-medium text-brand-green">{formatPrice(item)}</p>
               </div>
-            )}
-            <p class="text-sm font-semibold text-slate-800">{item.name}</p>
-            <p class="text-xs font-medium text-brand-green">{formatPrice(item)}</p>
-          </Card>
-        ))}
+              <Button
+                type="button"
+                class="mt-auto w-full"
+                data-order={item.id}
+                data-product-name={item.name}
+                data-product-price={formatPrice(item)}
+              >
+                Заказать
+              </Button>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   </Container>
@@ -96,6 +125,16 @@ const items = products;
               {item.name}
             </p>
             <p class="text-sm font-medium text-brand-green">{formatPrice(item)}</p>
+            <Button
+              type="button"
+              size="lg"
+              class="w-full"
+              data-order={item.id}
+              data-product-name={item.name}
+              data-product-price={formatPrice(item)}
+            >
+              Заказать
+            </Button>
           </div>
 
           <div class="flex flex-col justify-center gap-3">
@@ -111,33 +150,116 @@ const items = products;
 
 <script>
   const ADVANCE_MS = 5500;
+  // После ручного действия (стрелки, свайп, перетаскивание) авто-прокрутка молчит столько мс.
+  const USER_IDLE_MS = 9000;
+  const DRAG_THRESHOLD_PX = 6;
+
+  const isModalOpen = () => document.querySelector("[data-product-modal].flex") !== null;
 
   function initCarousel(root: HTMLElement) {
+    const viewport = root.querySelector<HTMLElement>("[data-carousel-viewport]");
     const track = root.querySelector<HTMLElement>("[data-carousel-track]");
-    if (!track) return;
+    if (!viewport || !track) return;
 
     const cards = Array.from(track.children) as HTMLElement[];
     const half = cards.length / 2;
-    let index = 0;
+    // Карточки продублированы (два одинаковых набора), прокрутка зациклена:
+    // как только ушли дальше первого набора — незаметно прыгаем на его начало.
+    const loopWidth = () => cards[half].offsetLeft - cards[0].offsetLeft;
+    const stepWidth = () => cards[1].offsetLeft - cards[0].offsetLeft;
 
-    const step = () => {
-      index += 1;
-      const card = cards[index];
-      if (!card) return;
-
-      track.style.transition = "transform 0.6s ease";
-      track.style.transform = `translateX(-${card.offsetLeft}px)`;
-
-      if (index >= half) {
-        window.setTimeout(() => {
-          track.style.transition = "none";
-          index = 0;
-          track.style.transform = "translateX(0px)";
-        }, 650);
+    const normalize = () => {
+      const loop = loopWidth();
+      if (viewport.scrollLeft >= loop) {
+        viewport.scrollTo({ left: viewport.scrollLeft - loop, behavior: "instant" });
       }
     };
 
-    window.setInterval(step, ADVANCE_MS);
+    let idleTimer: number | undefined;
+    viewport.addEventListener(
+      "scroll",
+      () => {
+        window.clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(normalize, 150);
+      },
+      { passive: true },
+    );
+
+    const next = () => {
+      normalize();
+      viewport.scrollBy({ left: stepWidth(), behavior: "smooth" });
+    };
+    const prev = () => {
+      if (viewport.scrollLeft < stepWidth()) {
+        viewport.scrollTo({ left: viewport.scrollLeft + loopWidth(), behavior: "instant" });
+      }
+      viewport.scrollBy({ left: -stepWidth(), behavior: "smooth" });
+    };
+
+    let userActiveUntil = 0;
+    let hovered = false;
+    const markUserActive = () => {
+      userActiveUntil = Date.now() + USER_IDLE_MS;
+    };
+
+    root.querySelector("[data-carousel-prev]")?.addEventListener("click", () => {
+      markUserActive();
+      prev();
+    });
+    root.querySelector("[data-carousel-next]")?.addEventListener("click", () => {
+      markUserActive();
+      next();
+    });
+
+    root.addEventListener("mouseenter", () => (hovered = true));
+    root.addEventListener("mouseleave", () => (hovered = false));
+    root.addEventListener("focusin", markUserActive);
+    viewport.addEventListener("touchstart", markUserActive, { passive: true });
+    viewport.addEventListener("wheel", markUserActive, { passive: true });
+
+    // Перетаскивание мышью (тач и трекпад скроллятся нативно).
+    let dragging = false;
+    let startX = 0;
+    let startScroll = 0;
+    let moved = 0;
+
+    viewport.addEventListener("pointerdown", (event) => {
+      if (event.pointerType !== "mouse" || event.button !== 0) return;
+      dragging = true;
+      startX = event.clientX;
+      startScroll = viewport.scrollLeft;
+      moved = 0;
+    });
+    window.addEventListener("pointermove", (event) => {
+      if (!dragging) return;
+      const dx = event.clientX - startX;
+      moved = Math.max(moved, Math.abs(dx));
+      viewport.scrollLeft = startScroll - dx;
+      markUserActive();
+    });
+    window.addEventListener("pointerup", () => {
+      dragging = false;
+    });
+    // Если это было перетаскивание — не считаем отпускание кнопки кликом по карточке.
+    viewport.addEventListener(
+      "click",
+      (event) => {
+        if (moved > DRAG_THRESHOLD_PX) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
+        moved = 0;
+      },
+      true,
+    );
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    window.setInterval(() => {
+      if (hovered || dragging || isModalOpen() || document.hidden) return;
+      if (Date.now() < userActiveUntil) return;
+      next();
+    }, ADVANCE_MS);
   }
 
   document.querySelectorAll<HTMLElement>("[data-carousel]").forEach(initCarousel);
@@ -182,5 +304,29 @@ const items = products;
     document.querySelectorAll<HTMLElement>("[data-product-modal]").forEach((modal) => {
       if (!modal.classList.contains("hidden")) closeModal(modal);
     });
+  });
+
+  // TODO: заказ через бота — подключим сюда. Пока кнопка «Заказать» закрывает модалку,
+  // подставляет товар в комментарий формы заявки и прокручивает к форме.
+  function handleOrder(button: HTMLElement) {
+    const name = button.dataset.productName ?? "";
+    const price = button.dataset.productPrice ?? "";
+
+    document.querySelectorAll<HTMLElement>("[data-product-modal]").forEach((modal) => {
+      if (!modal.classList.contains("hidden")) closeModal(modal);
+    });
+
+    const form = document.querySelector<HTMLFormElement>("[data-lead-form]");
+    const comment = form?.querySelector<HTMLTextAreaElement>('textarea[name="comment"]');
+    if (comment) comment.value = `Хочу заказать: ${name}${price ? ` (${price})` : ""}`;
+
+    document.getElementById("contacts")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.setTimeout(() => {
+      form?.querySelector<HTMLInputElement>('input[name="name"]')?.focus({ preventScroll: true });
+    }, 600);
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-order]").forEach((button) => {
+    button.addEventListener("click", () => handleOrder(button));
   });
 </script>

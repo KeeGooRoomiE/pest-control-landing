@@ -8,6 +8,7 @@ interface Props {
   variant?: Variant;
   size?: Size;
   class?: string;
+  [key: string]: unknown;
 }
 
 const {
@@ -16,6 +17,7 @@ const {
   variant = "primary",
   size = "md",
   class: className = "",
+  ...rest
 } = Astro.props;
 
 const variants: Record<Variant, string> = {
@@ -40,6 +42,6 @@ const classes = [
 const Tag = href ? "a" : "button";
 ---
 
-<Tag class={classes} href={href} type={href ? undefined : type}>
+<Tag {...rest} class={classes} href={href} type={href ? undefined : type}>
   <slot />
 </Tag>
