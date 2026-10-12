@@ -1,28 +1,64 @@
-name: Send lead email
+name: Send lead to Telegram
+
+# Файл исторически называется lead-email.yml — оставлен, чтобы не ломать ссылки.
+# Заявка с формы сайта приходит как repository_dispatch и уходит в Telegram-группу.
+# Токен для dispatch публичен (лежит в JS страницы), поэтому client_payload —
+# недоверенные данные: в shell они попадают только через env, не через ${{ }} в run.
 
 on:
   repository_dispatch:
     types: [lead-form-submitted]
 
 jobs:
-  send-email:
+  send-telegram:
     runs-on: ubuntu-latest
     steps:
-      - name: Send email via client's SMTP
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          from: ${{ secrets.SMTP_USERNAME }}
-          to: in4qpc@gmail.com
-          subject: "Новая заявка с сайта — ${{ github.event.client_payload.name }}"
-          body: |
-            Новая заявка с лендинга ДезГарант.
+      - name: Send lead to Telegram group
+        env:
+          BOT_TOKEN: ${{ secrets.PIPLINE_BOT_SECRET }}
+          # Отдельный LEADS_CHAT_ID можно задать, если заявки должны идти не в чат деплоя.
+          CHAT_ID: ${{ secrets.LEADS_CHAT_ID || secrets.CHAT_ID }}
+          LEAD_NAME: ${{ github.event.client_payload.name }}
+          LEAD_PHONE: ${{ github.event.client_payload.phone }}
+          LEAD_OBJECT_TYPE: ${{ github.event.client_payload.objectType }}
+          LEAD_COMMENT: ${{ github.event.client_payload.comment }}
+        run: |
+          set -euo pipefail
+          export LC_ALL=C.UTF-8
 
-            Имя: ${{ github.event.client_payload.name }}
-            Телефон: ${{ github.event.client_payload.phone }}
-            Тип объекта: ${{ github.event.client_payload.objectType }}
-            Комментарий: ${{ github.event.client_payload.comment }}
-            Отправлено: ${{ github.event.client_payload.submittedAt }}
+          if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ]; then
+            echo "::error::Нет секретов Telegram (PIPLINE_BOT_SECRET / CHAT_ID) — заявка не отправлена"
+            exit 1
+          fi
+
+          # Убираем управляющие символы и режем длину (по символам, не по байтам).
+          clean() { printf '%s' "$1" | tr -d '\000-\010\013\014\016-\037' | sed 's/[[:space:]]*$//'; }
+          NAME=$(clean "${LEAD_NAME:-}");               NAME=${NAME:0:100}
+          PHONE=$(clean "${LEAD_PHONE:-}");             PHONE=${PHONE:0:50}
+          OBJECT_TYPE=$(clean "${LEAD_OBJECT_TYPE:-}"); OBJECT_TYPE=${OBJECT_TYPE:0:100}
+          COMMENT=$(clean "${LEAD_COMMENT:-}");         COMMENT=${COMMENT:0:1000}
+
+          if [ -z "$NAME" ] && [ -z "$PHONE" ]; then
+            echo "Пустая заявка (нет имени и телефона) — пропускаю"
+            exit 0
+          fi
+
+          TEXT="📩 Новая заявка с сайта"$'\n\n'
+          TEXT+="Имя: ${NAME:-—}"$'\n'
+          TEXT+="Телефон: ${PHONE:-—}"$'\n'
+          TEXT+="Тип объекта: ${OBJECT_TYPE:-—}"
+          if [ -n "$COMMENT" ]; then
+            TEXT+=$'\n'"Комментарий: ${COMMENT}"
+          fi
+          TEXT+=$'\n\n'"$(TZ=Asia/Almaty date '+%d.%m.%Y %H:%M') (Алматы)"
+
+          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${CHAT_ID}" \
+            --data-urlencode "text=${TEXT}" \
+            --data-urlencode "disable_web_page_preview=true")
+
+          if ! printf '%s' "$RESPONSE" | jq -e '.ok == true' > /dev/null; then
+            echo "::error::Telegram отклонил сообщение: $(printf '%s' "$RESPONSE" | jq -r '.description // "неизвестная ошибка"')"
+            exit 1
+          fi
+          echo "Заявка отправлена в Telegram"
