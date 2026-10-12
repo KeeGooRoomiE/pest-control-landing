@@ -1,9 +1,8 @@
 ---
 import Container from "../ui/Container.astro";
-import IconTile from "../ui/IconTile.astro";
 import { site } from "../../data/site";
 
-// Иконки — Lucide (MIT), цвет наследуется через currentColor (IconTile: text-brand-green).
+// Иконки — Lucide (MIT), цвет наследуется через currentColor.
 const trustPoints = [
   {
     label: "Опытные специалисты",
@@ -28,35 +27,47 @@ const trustPoints = [
 ];
 ---
 
-<section id="about" class="py-14">
-  <Container>
-    <div class="mx-auto max-w-3xl text-center">
-      <p class="text-sm font-semibold uppercase tracking-wide text-brand-green">О компании</p>
-      <h2 class="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
+<section id="about" class="py-20 sm:py-24 lg:py-28">
+  <Container class="grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-16">
+    <div class="lg:col-span-5">
+      <p class="reveal text-sm font-semibold uppercase tracking-[0.14em] text-brand-green">О компании</p>
+      <h2
+        class="reveal mt-3 text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl"
+        style="--reveal-delay: 80ms"
+      >
         {site.legalName}{site.sinceYear ? ` — на рынке с ${site.sinceYear} года` : ""}
       </h2>
-      <p class="mt-4 text-slate-600">
+      <p class="reveal mt-6 text-lg leading-relaxed text-slate-600" style="--reveal-delay: 160ms">
         Работаем с собственной профессиональной химией и приложим все усилия, чтобы решить вашу проблему
         с вредителями. Гарантируем позитивный опыт сотрудничества.
       </p>
     </div>
 
-    <div class="mt-10 grid grid-cols-2 gap-8 sm:grid-cols-5">
-      {trustPoints.map((point) => (
-        <IconTile label={point.label}>
-          <svg
-            class="h-6 w-6"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-            set:html={point.icon}
-          />
-        </IconTile>
+    <ul class="grid gap-4 sm:grid-cols-2 lg:col-span-7">
+      {trustPoints.map((point, i) => (
+        <li
+          class:list={[
+            "reveal group flex items-center gap-4 rounded-3xl bg-brand-mist p-5 ring-1 ring-slate-900/5 transition-colors duration-300 hover:bg-white hover:shadow-[0_14px_40px_rgb(15_27_45/0.08)] sm:p-6",
+            i === trustPoints.length - 1 && trustPoints.length % 2 === 1 && "sm:col-span-2",
+          ]}
+          style={`--reveal-delay: ${i * 80}ms`}
+        >
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white text-brand-green shadow-sm ring-1 ring-slate-900/5 transition-colors duration-300 group-hover:bg-brand-green group-hover:text-white">
+            <svg
+              class="h-6 w-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              set:html={point.icon}
+            />
+          </span>
+          <span class="font-semibold leading-snug text-ink">{point.label}</span>
+        </li>
       ))}
-    </div>
+    </ul>
   </Container>
 </section>

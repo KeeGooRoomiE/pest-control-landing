@@ -47,5 +47,17 @@ const {
       { rootMargin: "0px 0px -8% 0px", threshold: 0.08 },
     );
     items.forEach((el) => observer.observe(el));
+
+    // Страховка: блоки в самом низу страницы могут не попасть в зону появления
+    // (rootMargin отрезает нижние 8% окна) — при доскролле до конца показываем всё.
+    const revealRest = () => {
+      const atBottom = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+      if (!atBottom) return;
+      document.querySelectorAll<HTMLElement>(".reveal:not(.is-visible)").forEach((el) => el.classList.add("is-visible"));
+      observer.disconnect();
+      window.removeEventListener("scroll", revealRest);
+    };
+    window.addEventListener("scroll", revealRest, { passive: true });
+    revealRest();
   }
 </script>

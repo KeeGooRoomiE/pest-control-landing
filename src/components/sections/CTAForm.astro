@@ -4,93 +4,135 @@ import Button from "../ui/Button.astro";
 import { site } from "../../data/site";
 
 const objectTypes = ["Квартира/дом", "Офис", "Склад/производство", "Ресторан/кафе", "Другое"];
+
+// Иконки — Lucide (MIT).
+const contactRows = [
+  {
+    label: "Телефон",
+    value: site.phone,
+    href: site.phoneHref,
+    icon: `<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />`,
+  },
+  {
+    label: "Email",
+    value: site.email,
+    href: `mailto:${site.email}`,
+    icon: `<rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />`,
+  },
+  {
+    label: "Адрес",
+    value: site.address,
+    icon: `<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0" /><circle cx="12" cy="10" r="3" />`,
+  },
+  {
+    label: "Режим работы",
+    value: site.hours.map((h) => `${h.days}: ${h.time}`).join(" · "),
+    icon: `<circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" />`,
+  },
+];
+
+const fieldClass =
+  "mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-ink transition focus:border-brand-green focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-green/10";
 ---
 
-<section id="contacts" class="bg-brand-navy py-16 text-white">
-  <Container class="grid gap-10 lg:grid-cols-2">
-    <div>
-      <p class="text-sm font-semibold uppercase tracking-wide text-white/70">Контакты</p>
-      <h2 class="mt-2 text-2xl font-bold sm:text-3xl">Оставьте заявку — перезвоним и подберём решение</h2>
-      <p class="mt-3 text-white/70">
-        Заполните форму, и мы свяжемся с вами для уточнения деталей и расчёта стоимости обработки.
-      </p>
+<section id="contacts" class="py-12 sm:py-16 lg:py-20">
+  <Container>
+    <div class="relative overflow-hidden rounded-[2rem] bg-brand-navy p-6 text-white sm:rounded-[2.5rem] sm:p-10 lg:p-16">
+      <div class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-brand-green/30 blur-3xl" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-emerald-400/10 blur-3xl" aria-hidden="true"></div>
 
-      <dl class="mt-8 space-y-4 text-sm">
-        <div>
-          <dt class="text-white/50">Телефон</dt>
-          <dd><a href={site.phoneHref} class="text-lg font-semibold">{site.phone}</a></dd>
-        </div>
-        <div>
-          <dt class="text-white/50">Email</dt>
-          <dd><a href={`mailto:${site.email}`} class="font-semibold">{site.email}</a></dd>
-        </div>
-        <div>
-          <dt class="text-white/50">Адрес</dt>
-          <dd class="font-semibold">{site.address}</dd>
-        </div>
-        <div>
-          <dt class="text-white/50">Режим работы</dt>
-          <dd class="font-semibold">
-            {site.hours.map((h) => (
-              <span class="mr-3 inline-block">{h.days}: {h.time}</span>
-            ))}
-          </dd>
-        </div>
-      </dl>
-    </div>
-
-    <form data-lead-form class="rounded-2xl bg-white p-6 text-slate-800 shadow-lg sm:p-8">
-      <div class="grid gap-4">
-        <label class="block text-sm font-medium">
-          Имя
-          <input
-            type="text"
-            name="name"
-            required
-            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-green focus:outline-none"
-          />
-        </label>
-
-        <label class="block text-sm font-medium">
-          Телефон
-          <input
-            type="tel"
-            name="phone"
-            required
-            placeholder="+7 ___ ___ __ __"
-            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-green focus:outline-none"
-          />
-        </label>
-
-        <label class="block text-sm font-medium">
-          Тип объекта
-          <select
-            name="objectType"
-            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-green focus:outline-none"
+      <div class="relative grid gap-12 lg:grid-cols-12 lg:gap-14">
+        <div class="lg:col-span-5">
+          <p class="reveal text-sm font-semibold uppercase tracking-[0.14em] text-emerald-300">Контакты</p>
+          <h2
+            class="reveal mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl"
+            style="--reveal-delay: 80ms"
           >
-            {objectTypes.map((t) => <option value={t}>{t}</option>)}
-          </select>
-        </label>
+            Оставьте заявку — перезвоним и подберём решение
+          </h2>
+          <p class="reveal mt-5 text-lg leading-relaxed text-white/70" style="--reveal-delay: 160ms">
+            Заполните форму, и мы свяжемся с вами для уточнения деталей и расчёта стоимости обработки.
+          </p>
 
-        <label class="block text-sm font-medium">
-          Комментарий
-          <textarea
-            name="comment"
-            rows="3"
-            class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-green focus:outline-none"
-          ></textarea>
-        </label>
+          <ul class="mt-10 grid gap-5">
+            {contactRows.map((row, i) => (
+              <li class="reveal flex items-start gap-4" style={`--reveal-delay: ${200 + i * 70}ms`}>
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-emerald-300 ring-1 ring-white/10">
+                  <svg
+                    class="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    set:html={row.icon}
+                  />
+                </span>
+                <div>
+                  <p class="text-sm text-white/50">{row.label}</p>
+                  {row.href ? (
+                    <a href={row.href} class="mt-0.5 block text-lg font-semibold transition-colors hover:text-emerald-300">{row.value}</a>
+                  ) : (
+                    <p class="mt-0.5 text-lg font-semibold">{row.value}</p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-        <label class="flex items-start gap-2 text-xs text-slate-500">
-          <input type="checkbox" name="consent" required class="mt-0.5" />
-          Даю согласие на обработку персональных данных
-        </label>
+        <form
+          data-lead-form
+          class="reveal rounded-3xl bg-white p-6 text-slate-800 shadow-[0_30px_80px_-20px_rgb(0_0_0/0.5)] sm:p-8 lg:col-span-7"
+          style="--reveal-delay: 120ms"
+        >
+          <div class="grid gap-5">
+            <div class="grid gap-5 sm:grid-cols-2">
+              <label class="block text-sm font-medium text-ink">
+                Имя
+                <input type="text" name="name" required autocomplete="name" class={fieldClass} />
+              </label>
 
-        <Button type="submit" size="lg" class="w-full">Отправить заявку</Button>
+              <label class="block text-sm font-medium text-ink">
+                Телефон
+                <input
+                  type="tel"
+                  name="phone"
+                  required
+                  autocomplete="tel"
+                  inputmode="tel"
+                  placeholder="+7 ___ ___ __ __"
+                  class={fieldClass}
+                />
+              </label>
+            </div>
 
-        <p data-lead-form-status class="text-sm" role="status" aria-live="polite"></p>
+            <label class="block text-sm font-medium text-ink">
+              Тип объекта
+              <select name="objectType" class={fieldClass}>
+                {objectTypes.map((t) => <option value={t}>{t}</option>)}
+              </select>
+            </label>
+
+            <label class="block text-sm font-medium text-ink">
+              Комментарий
+              <textarea name="comment" rows="3" class={fieldClass}></textarea>
+            </label>
+
+            <label class="flex items-start gap-3 text-sm text-slate-500">
+              <input type="checkbox" name="consent" required class="mt-0.5 h-4 w-4 accent-brand-green" />
+              Даю согласие на обработку персональных данных
+            </label>
+
+            <Button type="submit" size="lg" class="w-full">Отправить заявку</Button>
+
+            <p data-lead-form-status class="text-sm" role="status" aria-live="polite"></p>
+          </div>
+        </form>
       </div>
-    </form>
+    </div>
   </Container>
 </section>
 
