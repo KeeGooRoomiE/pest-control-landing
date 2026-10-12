@@ -47,7 +47,7 @@ npm run preview   # предпросмотр собранной версии
 Форма в блоке "Контакты" не имеет бэкенда (GitHub Pages — статический хостинг). Отправка реализована так:
 
 1. Форма на клиенте шлёт `POST` на `https://api.github.com/repos/<repo>/dispatches` (`repository_dispatch`) — см. `src/components/sections/CTAForm.astro`.
-2. `.github/workflows/lead-email.yml` (имя файла историческое) слушает `repository_dispatch` и отправляет заявку в Telegram-группу через бота (тот же бот и чат, что и уведомления о деплое; чат заявок можно вынести отдельным секретом `LEADS_CHAT_ID`). Данные из `client_payload` считаются недоверенными — в shell они попадают только через переменные окружения.
+2. `.github/workflows/lead-email.yml` (имя файла историческое) слушает `repository_dispatch` и отправляет заявку в Telegram-группу через бота (бот заказов `@qaz_pest_bot`, токен — секрет `ORDERS_BOT_TOKEN`; пока его нет, используется бот деплоя; чат заявок можно вынести отдельным секретом `LEADS_CHAT_ID`). Данные из `client_payload` считаются недоверенными — в shell они попадают только через переменные окружения.
 3. Токен для вызова `dispatches` API подставляется Vite/Astro в клиентский JS на этапе сборки (`npm run build` в `deploy.yml`) из переменной окружения `PUBLIC_GITHUB_DISPATCH_TOKEN`, которая берётся из репозиторного секрета `PAGES_DISPATCH_TOKEN` — в исходниках репозитория токена нет (см. `src/components/sections/CTAForm.astro`, `import.meta.env.PUBLIC_GITHUB_DISPATCH_TOKEN`).
 
 **Важно про безопасность:** после сборки этот токен виден в открытом виде в JS на публичной странице — так и задумано (заказчик в курсе и согласен на этот риск), но именно поэтому:
@@ -59,7 +59,8 @@ npm run preview   # предпросмотр собранной версии
 | Секрет | Назначение |
 | --- | --- |
 | `PAGES_DISPATCH_TOKEN` | fine-grained PAT только на этот репозиторий, `Contents: Read and write` — подставляется в публичный JS при деплое |
-| `PIPLINE_BOT_SECRET` | токен Telegram-бота, от имени которого уходят заявки и уведомления о деплое |
+| `ORDERS_BOT_TOKEN` | токен `@qaz_pest_bot`, от его имени уходят заявки с формы (бот должен быть участником группы) |
+| `PIPLINE_BOT_SECRET` | токен Telegram-бота уведомлений о деплое (и запасной вариант для заявок) |
 | `CHAT_ID` | ID Telegram-группы (заявки и уведомления о деплое) |
 | `LEADS_CHAT_ID` | *необязательно* — отдельная группа только для заявок с формы; если не задан, используется `CHAT_ID` |
 

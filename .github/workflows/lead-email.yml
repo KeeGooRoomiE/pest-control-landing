@@ -15,7 +15,8 @@ jobs:
     steps:
       - name: Send lead to Telegram group
         env:
-          BOT_TOKEN: ${{ secrets.PIPLINE_BOT_SECRET }}
+          # Токен бота заказов (@qaz_pest_bot); пока секрета нет — бот деплоя.
+          BOT_TOKEN: ${{ secrets.ORDERS_BOT_TOKEN || secrets.PIPLINE_BOT_SECRET }}
           # Отдельный LEADS_CHAT_ID можно задать, если заявки должны идти не в чат деплоя.
           CHAT_ID: ${{ secrets.LEADS_CHAT_ID || secrets.CHAT_ID }}
           LEAD_NAME: ${{ github.event.client_payload.name }}
@@ -27,7 +28,7 @@ jobs:
           export LC_ALL=C.UTF-8
 
           if [ -z "${BOT_TOKEN:-}" ] || [ -z "${CHAT_ID:-}" ]; then
-            echo "::error::Нет секретов Telegram (PIPLINE_BOT_SECRET / CHAT_ID) — заявка не отправлена"
+            echo "::error::Нет секретов Telegram (ORDERS_BOT_TOKEN или PIPLINE_BOT_SECRET, и CHAT_ID) — заявка не отправлена"
             exit 1
           fi
 
