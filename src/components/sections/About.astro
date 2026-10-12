@@ -43,12 +43,12 @@ const trustPoints = [
       </p>
     </div>
 
-    <ul class="grid gap-4 sm:grid-cols-2 lg:col-span-7">
+    <ul class="grid gap-4 sm:grid-cols-2 lg:col-span-7 lg:grid-cols-1 xl:grid-cols-2">
       {trustPoints.map((point, i) => (
         <li
           class:list={[
             "reveal group flex items-center gap-4 rounded-3xl bg-brand-mist p-5 ring-1 ring-slate-900/5 transition-colors duration-300 hover:bg-white hover:shadow-[0_14px_40px_rgb(15_27_45/0.08)] sm:p-6",
-            i === trustPoints.length - 1 && trustPoints.length % 2 === 1 && "sm:col-span-2",
+            i === trustPoints.length - 1 && trustPoints.length % 2 === 1 && "sm:col-span-2 lg:col-span-1 xl:col-span-2",
           ]}
           style={`--reveal-delay: ${i * 80}ms`}
         >
