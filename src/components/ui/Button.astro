@@ -21,10 +21,13 @@ const {
 } = Astro.props;
 
 const variants: Record<Variant, string> = {
-  primary: "bg-brand-green text-white hover:bg-brand-green-dark",
-  secondary: "bg-white text-brand-green border border-brand-green hover:bg-brand-gray",
+  primary:
+    "bg-brand-green text-white shadow-lg shadow-brand-green/20 hover:-translate-y-0.5 hover:bg-brand-green-dark hover:shadow-xl hover:shadow-brand-green/25",
+  secondary:
+    "bg-white text-ink ring-1 ring-slate-200 hover:-translate-y-0.5 hover:text-brand-green hover:ring-brand-green/40",
   outline: "bg-transparent text-white border border-white/70 hover:bg-white/10",
-  danger: "bg-brand-red text-white hover:bg-brand-red-dark",
+  danger:
+    "bg-brand-red text-white shadow-lg shadow-brand-red/20 hover:-translate-y-0.5 hover:bg-brand-red-dark hover:shadow-xl hover:shadow-brand-red/25",
 };
 
 const sizes: Record<Size, string> = {
@@ -33,7 +36,7 @@ const sizes: Record<Size, string> = {
 };
 
 const classes = [
-  "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition-colors",
+  "inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 active:translate-y-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-green",
   variants[variant],
   sizes[size],
   className,

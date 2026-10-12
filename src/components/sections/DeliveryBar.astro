@@ -1,7 +1,8 @@
 ---
 import Container from "../ui/Container.astro";
 
-// Иконки — Lucide (MIT), цвет наследуется через currentColor (text-white/80).
+// Иконки — Lucide (MIT), цвет наследуется через currentColor.
+// Блок выводится внутри Hero (см. Hero.astro), якорь #delivery — для меню.
 const items = [
   {
     title: "Быстрая доставка",
@@ -26,26 +27,31 @@ const items = [
 ];
 ---
 
-<section id="delivery" class="bg-brand-navy py-8 text-white">
-  <Container class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-    {items.map((item) => (
-      <div class="flex items-center gap-3">
-        <svg
-          class="h-8 w-8 shrink-0 text-white/80"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.8"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-          set:html={item.icon}
-        />
+<div id="delivery">
+  <Container class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {items.map((item, i) => (
+      <div
+        class="reveal group flex items-center gap-4 rounded-2xl bg-white p-5 shadow-[0_2px_20px_rgb(15_27_45/0.06)] ring-1 ring-slate-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_36px_rgb(15_27_45/0.1)]"
+        style={`--reveal-delay: ${i * 90}ms`}
+      >
+        <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green transition-colors duration-300 group-hover:bg-brand-green group-hover:text-white">
+          <svg
+            class="h-6 w-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            set:html={item.icon}
+          />
+        </span>
         <div>
-          <p class="font-semibold leading-tight">{item.title}</p>
-          <p class="text-sm text-white/60">{item.hint}</p>
+          <p class="font-semibold leading-tight text-ink">{item.title}</p>
+          <p class="mt-1 text-sm text-slate-500">{item.hint}</p>
         </div>
       </div>
     ))}
   </Container>
-</section>
+</div>
