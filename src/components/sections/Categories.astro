@@ -1,9 +1,8 @@
 ---
 import Container from "../ui/Container.astro";
-import IconTile from "../ui/IconTile.astro";
+import SectionHeading from "../ui/SectionHeading.astro";
 
-// Иконки — Lucide (MIT), контур наследует цвет через currentColor,
-// см. IconTile.astro (text-brand-green).
+// Иконки — Lucide (MIT), контур наследует цвет через currentColor.
 const categories = [
   {
     label: "Инсектициды",
@@ -38,23 +37,32 @@ const categories = [
 ];
 ---
 
-<section id="categories" class="border-b border-slate-100 py-10">
+<section id="categories" class="bg-brand-mist py-20 sm:py-24">
   <Container>
-    <div class="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-6">
-      {categories.map((c) => (
-        <IconTile label={c.label} hint={c.hint}>
-          <svg
-            class="h-6 w-6"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-            set:html={c.icon}
-          />
-        </IconTile>
+    <SectionHeading eyebrow="Каталог" title="Категории продукции" class="reveal" />
+
+    <div class="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+      {categories.map((c, i) => (
+        <div
+          class="reveal group rounded-3xl bg-white p-5 shadow-[0_2px_20px_rgb(15_27_45/0.05)] ring-1 ring-slate-900/5 transition-shadow duration-300 hover:shadow-[0_14px_40px_rgb(15_27_45/0.1)] sm:p-6"
+          style={`--reveal-delay: ${i * 70}ms`}
+        >
+          <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-green/10 text-brand-green transition-colors duration-300 group-hover:bg-brand-green group-hover:text-white">
+            <svg
+              class="h-6 w-6"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+              set:html={c.icon}
+            />
+          </span>
+          <p class="mt-5 font-semibold leading-snug text-ink">{c.label}</p>
+          <p class="mt-1.5 text-sm leading-snug text-slate-500">{c.hint}</p>
+        </div>
       ))}
     </div>
   </Container>

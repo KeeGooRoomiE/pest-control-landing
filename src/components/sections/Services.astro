@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import Container from "../ui/Container.astro";
 import Button from "../ui/Button.astro";
-import CheckItem from "../ui/CheckItem.astro";
 import treatmentPhoto from "../../assets/services/treatment.jpg";
 
 const steps = [
@@ -23,38 +22,51 @@ const objects = [
 ];
 ---
 
-<section id="services" class="py-14">
-  <Container class="grid gap-10 lg:grid-cols-2 lg:items-center">
-    <div class="relative">
+<section id="services" class="py-20 sm:py-24 lg:py-28">
+  <Container class="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-10">
+    <div class="reveal relative lg:col-span-6">
+      <div class="absolute -right-4 -top-4 hidden h-3/4 w-3/4 rounded-[2rem] bg-brand-green/10 sm:block" aria-hidden="true"></div>
       <Image
         src={treatmentPhoto}
         alt="Специалист проводит обработку объекта от вредителей"
         width={739}
         height={415}
-        class="aspect-[4/3] w-full rounded-2xl object-cover"
+        class="relative aspect-[4/3] w-full rounded-[2rem] object-cover shadow-[0_30px_80px_-24px_rgb(15_27_45/0.35)] ring-1 ring-slate-900/5"
       />
     </div>
 
-    <div>
-      <p class="text-sm font-bold uppercase tracking-wide text-brand-red">Профессиональная дезинсекция</p>
-      <h2 class="mt-2 text-2xl font-bold text-slate-900 sm:text-3xl">
+    <div class="lg:col-span-6 lg:pl-6">
+      <p class="reveal text-sm font-semibold uppercase tracking-[0.14em] text-brand-green">Профессиональная дезинсекция</p>
+      <h2
+        class="reveal mt-3 text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl"
+        style="--reveal-delay: 80ms"
+      >
         Надёжная защита от вредителей с гарантией результата
       </h2>
 
-      <ul class="mt-6 space-y-3 text-slate-700">
-        {steps.map((s) => <CheckItem>{s}</CheckItem>)}
-      </ul>
+      <ol class="mt-10 grid gap-3">
+        {steps.map((step, i) => (
+          <li class="reveal flex items-center gap-4" style={`--reveal-delay: ${120 + i * 70}ms`}>
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-green/10 text-sm font-bold tabular-nums text-brand-green">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+            <span class="text-base font-medium text-ink sm:text-lg">{step}</span>
+          </li>
+        ))}
+      </ol>
 
-      <div class="mt-6 rounded-xl bg-brand-gray p-5">
-        <p class="mb-3 text-sm font-semibold text-slate-900">Обрабатываем объекты:</p>
-        <ul class="grid grid-cols-1 gap-2 text-sm text-slate-600 sm:grid-cols-2">
-          {objects.map((o) => <li>• {o}</li>)}
+      <div class="reveal mt-10" style="--reveal-delay: 200ms">
+        <p class="mb-3 text-sm font-semibold text-slate-500">Обрабатываем объекты</p>
+        <ul class="flex flex-wrap gap-2">
+          {objects.map((o) => (
+            <li class="rounded-full bg-brand-mist px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-900/5">{o}</li>
+          ))}
         </ul>
       </div>
 
-      <Button href="#contacts" variant="danger" size="lg" class="mt-6">
-        Заказать обработку
-      </Button>
+      <div class="reveal mt-10" style="--reveal-delay: 260ms">
+        <Button href="#contacts" variant="danger" size="lg" class="w-full sm:w-auto">Заказать обработку</Button>
+      </div>
     </div>
   </Container>
 </section>

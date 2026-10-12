@@ -23,20 +23,20 @@ const brands = [
 const getLogoUrl = (file: string) => brandImages[`../../assets/brands/${file}`];
 ---
 
-<section id="brands" class="border-y border-slate-100 bg-brand-gray py-12">
+<section id="brands" class="bg-brand-mist py-20 sm:py-24">
   <Container>
-    <SectionHeading title="Мы работаем с лучшими брендами" align="center" />
-    <div class="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-6">
-      {brands.map((brand) => (
-        <div class="flex h-16 w-36 items-center justify-center rounded-md border border-slate-200 bg-white p-3">
+    <SectionHeading title="Мы работаем с лучшими брендами" align="center" class="reveal" />
+    <ul class="mt-14 grid grid-cols-2 items-center gap-x-8 gap-y-10 sm:grid-cols-4 lg:grid-cols-7">
+      {brands.map((brand, i) => (
+        <li class="reveal flex h-14 items-center justify-center" style={`--reveal-delay: ${i * 60}ms`}>
           <img
             src={getLogoUrl(brand.file)}
             alt={brand.name}
-            class="max-h-full max-w-full object-contain"
+            class="max-h-full max-w-full object-contain opacity-75 grayscale transition duration-300 hover:opacity-100 hover:grayscale-0"
             loading="lazy"
           />
-        </div>
+        </li>
       ))}
-    </div>
+    </ul>
   </Container>
 </section>

@@ -2,7 +2,6 @@
 import { Image } from "astro:assets";
 import Container from "../ui/Container.astro";
 import SectionHeading from "../ui/SectionHeading.astro";
-import Card from "../ui/Card.astro";
 import Button from "../ui/Button.astro";
 import products from "../../data/products.json";
 import { orderLink } from "../../config/bot";
@@ -21,61 +20,66 @@ const formatPrice = (item: (typeof products)[number]) =>
 const items = products;
 
 const arrowClass =
-  "absolute top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/95 text-slate-700 shadow-md transition-colors hover:bg-white hover:text-brand-green";
+  "absolute top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-white text-ink shadow-[0_8px_24px_rgb(15_27_45/0.16)] ring-1 ring-slate-900/5 transition-all duration-200 hover:scale-105 hover:text-brand-green active:scale-95";
 ---
 
-<section class="py-14">
+<section id="products" class="py-20 sm:py-24 lg:py-28">
   <Container>
     <SectionHeading
       eyebrow="Что мы используем"
       title="Продукция, с которой мы работаем"
       subtitle="Витрина оригинальных препаратов и оборудования, применяемых нашими специалистами."
+      class="reveal"
     />
 
-    <div class="relative mt-8" data-carousel>
-      <button type="button" class:list={[arrowClass, "left-2"]} data-carousel-prev aria-label="Предыдущие товары">
+    <div class="relative mt-12" data-carousel>
+      <button type="button" class:list={[arrowClass, "left-2 sm:left-3"]} data-carousel-prev aria-label="Предыдущие товары">
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="m15 18-6-6 6-6" />
         </svg>
       </button>
-      <button type="button" class:list={[arrowClass, "right-2"]} data-carousel-next aria-label="Следующие товары">
+      <button type="button" class:list={[arrowClass, "right-2 sm:right-3"]} data-carousel-next aria-label="Следующие товары">
         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="m9 18 6-6-6-6" />
         </svg>
       </button>
 
-      <div class="overflow-x-auto py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" data-carousel-viewport>
-        <div class="flex w-max select-none gap-4" data-carousel-track>
+      <div class="-my-8 overflow-x-auto py-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" data-carousel-viewport>
+        <div class="flex w-max select-none gap-5" data-carousel-track>
           {[...items, ...items].map((item) => (
-            <Card class="flex w-56 shrink-0 flex-col items-center gap-3 p-5 text-center">
+            <article class="group flex w-64 shrink-0 flex-col rounded-3xl bg-white p-3 shadow-[0_2px_20px_rgb(15_27_45/0.06)] ring-1 ring-slate-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_48px_rgb(15_27_45/0.12)]">
               <div
                 role="button"
                 tabindex="0"
                 aria-haspopup="dialog"
                 data-open-modal={item.id}
-                class="flex w-full cursor-pointer flex-col items-center gap-3"
+                class="flex cursor-pointer flex-col"
               >
-                {getImage(item) ? (
-                  <Image
-                    src={getImage(item)!}
-                    alt={item.name}
-                    width={224}
-                    height={128}
-                    draggable="false"
-                    class="h-32 w-full rounded-lg object-contain"
-                  />
-                ) : (
-                  <div class="flex h-32 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-xs text-slate-400">
-                    Фото
-                  </div>
-                )}
-                <p class="text-sm font-semibold text-slate-800">{item.name}</p>
-                <p class="text-xs font-medium text-brand-green">{formatPrice(item)}</p>
+                <div class="flex h-44 items-center justify-center overflow-hidden rounded-2xl bg-brand-mist p-4">
+                  {getImage(item) ? (
+                    <Image
+                      src={getImage(item)!}
+                      alt={item.name}
+                      width={480}
+                      height={352}
+                      draggable="false"
+                      class="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <span class="text-xs text-slate-400">Фото</span>
+                  )}
+                </div>
+                <div class="px-3 pb-2 pt-4">
+                  <h3 class="line-clamp-3 min-h-[3.9rem] text-[0.95rem] font-semibold leading-snug text-ink">{item.name}</h3>
+                  <p class="mt-2 text-lg font-bold tracking-tight text-brand-green">{formatPrice(item)}</p>
+                </div>
               </div>
-              <Button href={orderLink(item.id)} target="_blank" rel="noopener" class="mt-auto w-full">
-                Заказать
-              </Button>
-            </Card>
+              <div class="mt-auto px-3 pb-3 pt-1">
+                <Button href={orderLink(item.id)} target="_blank" rel="noopener" variant="secondary" class="w-full">
+                  Заказать
+                </Button>
+              </div>
+            </article>
           ))}
         </div>
       </div>
@@ -85,49 +89,51 @@ const arrowClass =
   {items.map((item) => (
     <div
       id={`product-modal-${item.id}`}
-      class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 p-4"
+      class="fixed inset-0 z-[60] hidden items-center justify-center bg-ink/50 p-4 backdrop-blur-sm"
       data-product-modal
       role="dialog"
       aria-modal="true"
       aria-labelledby={`product-modal-${item.id}-title`}
     >
-      <div class="relative flex max-h-[85vh] w-full max-w-3xl flex-col overflow-y-auto rounded-2xl bg-white shadow-xl">
+      <div class="modal-in relative flex max-h-[88vh] w-full max-w-4xl flex-col overflow-y-auto rounded-[2rem] bg-white shadow-[0_40px_100px_-20px_rgb(15_27_45/0.5)]">
         <button
           type="button"
-          class="sticky top-4 z-10 ml-auto mr-4 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-800"
+          class="sticky top-4 z-10 ml-auto mr-4 mt-4 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-ink"
           data-modal-close
           aria-label="Закрыть"
         >
           &#10005;
         </button>
 
-        <div class="grid gap-6 p-6 pt-0 sm:grid-cols-2 sm:p-8 sm:pt-0">
-          <div class="flex flex-col items-center gap-3 text-center sm:items-start sm:text-left">
-            {getImage(item) ? (
-              <Image
-                src={getImage(item)!}
-                alt={item.name}
-                width={400}
-                height={300}
-                class="h-48 w-full rounded-lg object-contain"
-              />
-            ) : (
-              <div class="flex h-48 w-full items-center justify-center rounded-lg border-2 border-dashed border-slate-200 text-sm text-slate-400">
-                Фото
-              </div>
-            )}
-            <p id={`product-modal-${item.id}-title`} class="text-lg font-semibold text-slate-900">
-              {item.name}
-            </p>
-            <p class="text-sm font-medium text-brand-green">{formatPrice(item)}</p>
+        <div class="grid gap-8 p-6 pt-2 sm:grid-cols-5 sm:gap-10 sm:p-10 sm:pt-2">
+          <div class="flex flex-col gap-5 sm:col-span-2">
+            <div class="flex aspect-square items-center justify-center rounded-3xl bg-brand-mist p-6">
+              {getImage(item) ? (
+                <Image
+                  src={getImage(item)!}
+                  alt={item.name}
+                  width={640}
+                  height={640}
+                  class="h-full w-full object-contain"
+                />
+              ) : (
+                <span class="text-sm text-slate-400">Фото</span>
+              )}
+            </div>
+            <div>
+              <h3 id={`product-modal-${item.id}-title`} class="text-xl font-bold leading-snug tracking-tight text-ink">
+                {item.name}
+              </h3>
+              <p class="mt-2 text-2xl font-bold tracking-tight text-brand-green">{formatPrice(item)}</p>
+            </div>
             <Button href={orderLink(item.id)} target="_blank" rel="noopener" size="lg" class="w-full">
               Заказать
             </Button>
           </div>
 
-          <div class="flex flex-col justify-center gap-3">
+          <div class="flex flex-col gap-4 text-[0.95rem] leading-relaxed text-slate-600 sm:col-span-3">
             {item.description.split("\n\n").map((paragraph) => (
-              <p class="text-sm leading-relaxed text-slate-600">{paragraph}</p>
+              <p>{paragraph}</p>
             ))}
           </div>
         </div>
