@@ -46,7 +46,7 @@ const arrowClass =
 
       <div class="-my-8 overflow-x-auto py-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" data-carousel-viewport>
         <div class="flex w-max select-none gap-5" data-carousel-track>
-          {[...items, ...items].map((item) => (
+          {items.map((item) => (
             <article class="group flex w-64 shrink-0 flex-col rounded-3xl bg-white p-3 shadow-[0_2px_20px_rgb(15_27_45/0.06)] ring-1 ring-slate-900/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_48px_rgb(15_27_45/0.12)]">
               <div
                 role="button"
@@ -155,14 +155,29 @@ const arrowClass =
     const track = root.querySelector<HTMLElement>("[data-carousel-track]");
     if (!viewport || !track) return;
 
+    // В разметке (и для поисковиков) каждый товар один раз. Для зацикленной прокрутки
+    // скрипт добавляет второй набор — копии скрыты от скринридеров и из табуляции.
+    const originals = Array.from(track.children) as HTMLElement[];
+    originals.forEach((card) => {
+      const clone = card.cloneNode(true) as HTMLElement;
+      clone.setAttribute("aria-hidden", "true");
+      clone.querySelectorAll<HTMLElement>("a, button, [tabindex]").forEach((el) => el.setAttribute("tabindex", "-1"));
+      clone.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+      track.appendChild(clone);
+    });
+
     const cards = Array.from(track.children) as HTMLElement[];
-    const half = cards.length / 2;
-    // Карточки продублированы (два одинаковых набора), прокрутка зациклена:
-    // как только ушли дальше первого набора — незаметно прыгаем на его начало.
+    const half = originals.length;
+    // Два одинаковых набора, прокрутка зациклена: как только ушли дальше первого набора —
+    // незаметно прыгаем на его начало.
     const loopWidth = () => cards[half].offsetLeft - cards[0].offsetLeft;
     const stepWidth = () => cards[1].offsetLeft - cards[0].offsetLeft;
 
+    // После программного прыжка в «хвост» (prev с начала) нормализация не должна откатывать
+    // позицию, пока идёт плавная прокрутка (на слабых устройствах она стартует с задержкой).
+    let normalizeLockUntil = 0;
     const normalize = () => {
+      if (Date.now() < normalizeLockUntil) return;
       const loop = loopWidth();
       if (viewport.scrollLeft >= loop) {
         viewport.scrollTo({ left: viewport.scrollLeft - loop, behavior: "instant" });
@@ -185,6 +200,7 @@ const arrowClass =
     };
     const prev = () => {
       if (viewport.scrollLeft < stepWidth()) {
+        normalizeLockUntil = Date.now() + 2500;
         viewport.scrollTo({ left: viewport.scrollLeft + loopWidth(), behavior: "instant" });
       }
       viewport.scrollBy({ left: -stepWidth(), behavior: "smooth" });

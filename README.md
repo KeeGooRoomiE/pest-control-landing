@@ -4,7 +4,7 @@
 
 ## Стек
 
-- [Astro](https://astro.build) (статическая сборка), Node.js 22+
+- [Astro](https://astro.build) (статическая сборка), Node.js 22.12+ (в CI используется 24)
 - Tailwind CSS v4 (`@tailwindcss/vite`)
 - Ванильный TypeScript для интерактива (карусель, форма заявки) — без UI-фреймворка
 
@@ -13,19 +13,24 @@
 ```
 src/
   components/
-    ui/         — переиспользуемые объекты: Button, Card, Badge, SectionHeading, CheckItem, IconTile, Container
-    sections/   — секции страницы: Header, Hero, Categories, DeliveryBar, ProductCarousel, Services, Brands, About, CTAForm, Footer
+    ui/         — переиспользуемые объекты: Button, SectionHeading, Container
+    sections/   — секции страницы: Header, Hero (внутри — DeliveryBar), Services, Categories, ProductCarousel, Brands, About, CTAForm, Footer
   config/
     leadForm.ts — публичный конфиг для отправки заявок (см. "Отправка заявок с формы" ниже)
   data/
     site.ts     — контакты компании, часы работы, пункты меню
+    products.json — товары (id, name, price, currency, image, description): единственный источник для карусели, модалок и бота
+  assets/       — логотип, фото (hero, услуги, товары в groceries/), логотипы брендов
   layouts/
     Layout.astro
   pages/
     index.astro — сборка всех секций в одну страницу с якорями
+public/         — фавикон и иконки (favicon.ico, icon-32/192.png, apple-touch-icon.png)
+bot/            — Telegram-бот приёма заказов на Python (см. bot/README.md)
+.github/workflows/ — deploy.yml (сборка и деплой), lead-email.yml (форма контактов → Telegram; имя файла историческое)
 ```
 
-Сайт одностраничный: пункты меню — якорные ссылки (`#hero`, `#categories`, `#brands`, `#services`, `#about`, `#delivery`, `#contacts`).
+Сайт одностраничный: пункты меню — якорные ссылки (`#hero`, `#services`, `#categories`, `#products`, `#brands`, `#about`, `#delivery`, `#contacts`).
 
 ## Разработка
 
@@ -64,6 +69,8 @@ npm run preview   # предпросмотр собранной версии
 | `CHAT_ID` | ID Telegram-группы (заявки и уведомления о деплое) |
 | `LEADS_CHAT_ID` | *необязательно* — отдельная группа только для заявок с формы; если не задан, используется `CHAT_ID` |
 
-## Ассеты
+## Ассеты и контент
 
-Реальные изображения (логотип, фото товаров, иконки, фото специалистов) клиент передаёт по мере готовности. Куда класть каждый файл — см. внутренний `.claude/ASSETS.md` (не в репозитории). До получения реальных материалов используются заглушки, помеченные `TODO` в коде.
+- Товары — `src/data/products.json`, фото — `src/assets/groceries/` (имя файла указывается в поле `image`). Новый товар: добавить запись (id в формате kebab-case: он же попадает в ссылку на бота `start=order_<id>`, допустимы `A–Z a–z 0–9 _ -`, до 58 символов) и фото.
+- Бот заказов (`bot/`) читает тот же `products.json` с GitHub, поэтому новые товары подхватываются без правок бота.
+- Логотипы брендов — `src/assets/brands/` (список — в `src/components/sections/Brands.astro`).

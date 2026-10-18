@@ -15,7 +15,6 @@ export const site = {
   ],
   // Год основания — уточнить у клиента; пока null, фраза "на рынке с N года" не показывается.
   sinceYear: null as number | null,
-  leadEmailTarget: "in4qpc@gmail.com",
 };
 
 export const navLinks = [
