@@ -22,50 +22,57 @@ const objects = [
 ];
 ---
 
-<section id="services" class="py-20 sm:py-24 lg:py-28">
-  <Container class="grid gap-14 lg:grid-cols-12 lg:items-center lg:gap-10">
-    <div class="reveal relative lg:col-span-6">
-      <div class="absolute -right-4 -top-4 hidden h-3/4 w-3/4 rounded-[2rem] bg-brand-green/10 sm:block" aria-hidden="true"></div>
-      <Image
-        src={treatmentPhoto}
-        alt="Специалист проводит обработку объекта от вредителей"
-        width={739}
-        height={415}
-        class="relative aspect-[4/3] w-full rounded-[2rem] object-cover shadow-[0_30px_80px_-24px_rgb(15_27_45/0.35)] ring-1 ring-slate-900/5"
-      />
-    </div>
+<section id="services" class="py-12 sm:py-16 lg:py-20">
+  <Container>
+    <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand-red to-brand-red-dark p-6 text-white sm:rounded-[2.5rem] sm:p-10 lg:p-16">
+      <div class="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-white/10 blur-3xl" aria-hidden="true"></div>
+      <div class="pointer-events-none absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-black/10 blur-3xl" aria-hidden="true"></div>
 
-    <div class="lg:col-span-6 lg:pl-6">
-      <p class="reveal text-sm font-semibold uppercase tracking-[0.14em] text-brand-green">Профессиональная дезинсекция</p>
-      <h2
-        class="reveal mt-3 text-3xl font-bold leading-tight tracking-tight text-ink sm:text-4xl"
-        style="--reveal-delay: 80ms"
-      >
-        Надёжная защита от вредителей с гарантией результата
-      </h2>
+      <div class="relative grid gap-12 lg:grid-cols-12 lg:items-center lg:gap-14">
+        <div class="reveal relative lg:col-span-6">
+          <div class="absolute -right-4 -top-4 hidden h-3/4 w-3/4 rounded-[2rem] bg-white/15 sm:block" aria-hidden="true"></div>
+          <Image
+            src={treatmentPhoto}
+            alt="Специалист проводит обработку объекта от вредителей"
+            width={739}
+            height={415}
+            class="relative aspect-[4/3] w-full rounded-[2rem] object-cover shadow-[0_30px_80px_-24px_rgb(0_0_0/0.5)] ring-1 ring-white/20"
+          />
+        </div>
 
-      <ol class="mt-10 grid gap-3">
-        {steps.map((step, i) => (
-          <li class="reveal flex items-center gap-4" style={`--reveal-delay: ${120 + i * 70}ms`}>
-            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-green/10 text-sm font-bold tabular-nums text-brand-green">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <span class="text-base font-medium text-ink sm:text-lg">{step}</span>
-          </li>
-        ))}
-      </ol>
+        <div class="lg:col-span-6">
+          <p class="reveal text-sm font-semibold uppercase tracking-[0.14em] text-white/90">Профессиональная дезинсекция</p>
+          <h2
+            class="reveal mt-3 text-3xl font-bold leading-tight tracking-tight sm:text-4xl"
+            style="--reveal-delay: 80ms"
+          >
+            Надёжная защита от вредителей с гарантией результата
+          </h2>
 
-      <div class="reveal mt-10" style="--reveal-delay: 200ms">
-        <p class="mb-3 text-sm font-semibold text-slate-500">Обрабатываем объекты</p>
-        <ul class="flex flex-wrap gap-2">
-          {objects.map((o) => (
-            <li class="rounded-full bg-brand-mist px-4 py-2 text-sm font-medium text-slate-700 ring-1 ring-slate-900/5">{o}</li>
-          ))}
-        </ul>
-      </div>
+          <ol class="mt-10 grid gap-3">
+            {steps.map((step, i) => (
+              <li class="reveal flex items-center gap-4" style={`--reveal-delay: ${120 + i * 70}ms`}>
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/15 text-sm font-bold tabular-nums ring-1 ring-white/20">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span class="text-base font-medium sm:text-lg">{step}</span>
+              </li>
+            ))}
+          </ol>
 
-      <div class="reveal mt-10" style="--reveal-delay: 260ms">
-        <Button href="#contacts" variant="danger" size="lg" class="w-full sm:w-auto">Заказать обработку</Button>
+          <div class="reveal mt-10" style="--reveal-delay: 200ms">
+            <p class="mb-3 text-sm font-semibold text-white/90">Обрабатываем объекты</p>
+            <ul class="flex flex-wrap gap-2">
+              {objects.map((o) => (
+                <li class="rounded-full bg-white/15 px-4 py-2 text-sm font-medium ring-1 ring-white/20">{o}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div class="reveal mt-10" style="--reveal-delay: 260ms">
+            <Button href="#contacts" variant="light" size="lg" class="w-full sm:w-auto">Заказать обработку</Button>
+          </div>
+        </div>
       </div>
     </div>
   </Container>

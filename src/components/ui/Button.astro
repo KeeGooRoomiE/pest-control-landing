@@ -1,5 +1,5 @@
 ---
-type Variant = "primary" | "secondary" | "outline" | "danger";
+type Variant = "primary" | "secondary" | "outline" | "danger" | "light";
 type Size = "md" | "lg";
 
 interface Props {
@@ -25,6 +25,8 @@ const variants: Record<Variant, string> = {
     "bg-brand-green text-white shadow-lg shadow-brand-green/20 hover:-translate-y-0.5 hover:bg-brand-green-dark hover:shadow-xl hover:shadow-brand-green/25",
   secondary:
     "bg-white text-ink ring-1 ring-slate-200 hover:-translate-y-0.5 hover:text-brand-green hover:ring-brand-green/40",
+  light:
+    "bg-white text-brand-red shadow-lg shadow-black/15 hover:-translate-y-0.5 hover:bg-red-50 hover:shadow-xl",
   outline: "bg-transparent text-white border border-white/70 hover:bg-white/10",
   danger:
     "bg-brand-red text-white shadow-lg shadow-brand-red/20 hover:-translate-y-0.5 hover:bg-brand-red-dark hover:shadow-xl hover:shadow-brand-red/25",
