@@ -27,7 +27,7 @@ src/
     index.astro — сборка всех секций в одну страницу с якорями
 public/         — фавикон и иконки (favicon.ico, icon-32/192.png, apple-touch-icon.png)
 bot/            — Telegram-бот приёма заказов на Python (см. bot/README.md)
-.github/workflows/ — deploy.yml (сборка и деплой), lead-email.yml (форма контактов → Telegram; имя файла историческое)
+.github/workflows/ — deploy.yml (сборка и деплой), lead-telegram.yml (форма контактов → Telegram), bot-tests.yml (тесты бота)
 ```
 
 Сайт одностраничный: пункты меню — якорные ссылки (`#hero`, `#services`, `#categories`, `#products`, `#brands`, `#about`, `#delivery`, `#contacts`).
@@ -52,7 +52,7 @@ npm run preview   # предпросмотр собранной версии
 Форма в блоке "Контакты" не имеет бэкенда (GitHub Pages — статический хостинг). Отправка реализована так:
 
 1. Форма на клиенте шлёт `POST` на `https://api.github.com/repos/<repo>/dispatches` (`repository_dispatch`) — см. `src/components/sections/CTAForm.astro`.
-2. `.github/workflows/lead-email.yml` (имя файла историческое) слушает `repository_dispatch` и отправляет заявку в Telegram-группу через бота (бот заказов `@qaz_pest_bot`, токен — секрет `ORDERS_BOT_TOKEN`; пока его нет, используется бот деплоя; чат заявок можно вынести отдельным секретом `LEADS_CHAT_ID`). Данные из `client_payload` считаются недоверенными — в shell они попадают только через переменные окружения.
+2. `.github/workflows/lead-telegram.yml` слушает `repository_dispatch` и отправляет заявку в Telegram-группу через бота (бот заказов `@qaz_pest_bot`, токен — секрет `ORDERS_BOT_TOKEN`; пока его нет, используется бот деплоя; чат заявок можно вынести отдельным секретом `LEADS_CHAT_ID`). Данные из `client_payload` считаются недоверенными — в shell они попадают только через переменные окружения.
 3. Токен для вызова `dispatches` API подставляется Vite/Astro в клиентский JS на этапе сборки (`npm run build` в `deploy.yml`) из переменной окружения `PUBLIC_GITHUB_DISPATCH_TOKEN`, которая берётся из репозиторного секрета `PAGES_DISPATCH_TOKEN` — в исходниках репозитория токена нет (см. `src/components/sections/CTAForm.astro`, `import.meta.env.PUBLIC_GITHUB_DISPATCH_TOKEN`).
 
 **Важно про безопасность:** после сборки этот токен виден в открытом виде в JS на публичной странице — так и задумано (заказчик в курсе и согласен на этот риск), но именно поэтому:

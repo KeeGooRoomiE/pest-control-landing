@@ -1,0 +1,27 @@
+name: Bot tests
+
+on:
+  push:
+    paths: ["bot/**", ".github/workflows/bot-tests.yml"]
+  pull_request:
+    paths: ["bot/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  unittest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: bot/requirements.txt
+
+      - run: pip install -r bot/requirements.txt
+
+      # Тесты не ходят в сеть и не требуют токенов — только логика диалога и каталога.
+      - run: python -m unittest discover -s bot -p "test_*.py" -v

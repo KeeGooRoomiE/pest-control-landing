@@ -159,7 +159,7 @@ The only rule: nothing from the chat goes into the repository. No hardcoded secr
 - `src/components/ui/` — переиспользуемые UI-примитивы
 - `src/config/leadForm.ts` — конфиг отправки заявок
 - `.github/workflows/deploy.yml` — сборка и деплой на GitHub Pages
-- `.github/workflows/lead-email.yml` — отправка письма по заявке через SMTP клиента
+- `.github/workflows/lead-telegram.yml` — заявка с формы контактов → Telegram-группа через бота
 
 **Dev-сервер:** запускать в background-режиме — `astro dev --background`. Управление: `astro dev stop`, `astro dev status`, `astro dev logs`.
 
