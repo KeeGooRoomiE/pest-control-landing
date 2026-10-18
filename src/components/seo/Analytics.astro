@@ -1,0 +1,44 @@
+---
+// Счётчики подключаются ТОЛЬКО если заданы переменные сборки (GitHub → Settings → Secrets and
+// variables → Actions → Variables): PUBLIC_YM_ID (Яндекс Метрика) и/или PUBLIC_GA_ID (GA4, вида G-XXXX).
+// Пока переменных нет — на странице нет ни счётчиков, ни cookie.
+// Перед включением решить вопрос с уведомлением о cookie/согласием (см. аудит).
+const ymId = import.meta.env.PUBLIC_YM_ID;
+const gaId = import.meta.env.PUBLIC_GA_ID;
+const enabled = Boolean(ymId || gaId);
+---
+
+{
+  enabled && (
+    <>
+      {ymId && (
+        <script is:inline define:vars={{ ymId }}>
+          {`(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");ym(Number(ymId),"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true});`}
+        </script>
+      )}
+      {gaId && <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />}
+      {gaId && (
+        <script is:inline define:vars={{ gaId }}>
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}window.gtag=gtag;gtag("js",new Date());gtag("config",gaId);`}
+        </script>
+      )}
+      <script is:inline define:vars={{ ymId: ymId ?? "", gaId: gaId ?? "" }}>
+        {`(function(){
+          function goal(name){
+            try{ if(ymId && window.ym) window.ym(Number(ymId),"reachGoal",name); }catch(e){}
+            try{ if(gaId && window.gtag) window.gtag("event",name); }catch(e){}
+          }
+          document.addEventListener("click",function(ev){
+            var a=ev.target.closest&&ev.target.closest("a[href]");
+            if(!a) return;
+            var h=a.getAttribute("href")||"";
+            if(h.indexOf("tel:")===0) goal("phone_click");
+            else if(h.indexOf("mailto:")===0) goal("email_click");
+            else if(h.indexOf("t.me/")>-1) goal("order_click");
+          },true);
+          document.addEventListener("lead:submitted",function(){ goal("lead_submitted"); });
+        })();`}
+        </script>
+    </>
+  )
+}

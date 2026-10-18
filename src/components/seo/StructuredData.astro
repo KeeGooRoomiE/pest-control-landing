@@ -1,0 +1,81 @@
+---
+// Структурированные данные (JSON-LD): компания, сайт и каталог товаров.
+// Все значения берутся из src/data/site.ts и src/data/products.json — ничего не выдумываем:
+// нет координат, отзывов, наличия и области обслуживания — эти поля намеренно не заполняем,
+// пока клиент не подтвердит данные.
+import { getImage } from "astro:assets";
+import { site } from "../../data/site";
+import products from "../../data/products.json";
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+const origin = Astro.site!;
+const abs = (path: string) => new URL(`${base}${path}`, origin).href;
+const pageUrl = new URL(`${base}/`, origin).href;
+
+const productImages = import.meta.glob<{ default: ImageMetadata }>("../../assets/groceries/*", { eager: true });
+
+const firstParagraph = (text: string) => {
+  const first = text.split("\n\n")[0].trim();
+  return first.length > 300 ? `${first.slice(0, 297).trimEnd()}…` : first;
+};
+
+const items = await Promise.all(
+  products.map(async (p, i) => {
+    const meta = p.image ? productImages[`../../assets/groceries/${p.image}`]?.default : undefined;
+    const image = meta ? new URL((await getImage({ src: meta, width: 800, format: "webp" })).src, origin).href : undefined;
+    return {
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Product",
+        "@id": `${pageUrl}#product-${p.id}`,
+        sku: p.id,
+        name: p.name,
+        description: firstParagraph(p.description),
+        ...(image && { image }),
+        offers: {
+          "@type": "Offer",
+          price: p.price,
+          priceCurrency: p.currency,
+          url: `${pageUrl}#products`,
+        },
+      },
+    };
+  }),
+);
+
+const graph = [
+  {
+    "@type": "LocalBusiness",
+    "@id": `${pageUrl}#business`,
+    name: site.companyName,
+    legalName: site.legalName,
+    description: site.tagline,
+    url: pageUrl,
+    logo: abs("/icon-192.png"),
+    image: abs("/og-image.jpg"),
+    telephone: site.phoneHref.replace("tel:", ""),
+    email: site.email,
+    address: { "@type": "PostalAddress", ...site.addressParts },
+    openingHoursSpecification: site.openingHours.map((h) => ({ "@type": "OpeningHoursSpecification", ...h })),
+  },
+  {
+    "@type": "WebSite",
+    "@id": `${pageUrl}#website`,
+    url: pageUrl,
+    name: site.companyName,
+    inLanguage: "ru",
+    publisher: { "@id": `${pageUrl}#business` },
+  },
+  {
+    "@type": "ItemList",
+    "@id": `${pageUrl}#products`,
+    name: "Продукция",
+    itemListElement: items,
+  },
+];
+
+const json = JSON.stringify({ "@context": "https://schema.org", "@graph": graph }).replace(/</g, "\\u003c");
+---
+
+<script type="application/ld+json" set:html={json} />

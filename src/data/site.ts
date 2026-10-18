@@ -9,16 +9,26 @@ export const site = {
   phoneHref: "tel:+77057634969",
   email: "in4.qpc@gmail.com",
   address: "Казахстан, г. Алматы, ул. Бекмаханова 93/2",
+  // Те же данные по частям — для структурированной разметки (schema.org).
+  addressParts: {
+    streetAddress: "ул. Бекмаханова, 93/2",
+    addressLocality: "Алматы",
+    addressCountry: "KZ",
+  },
   hours: [
     { days: "Пн–Пт", time: "9:00–18:00" },
     { days: "Сб, Вс", time: "выходной" },
+  ],
+  // Рабочие часы для schema.org; держать в синхроне с `hours` выше.
+  openingHours: [
+    { dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], opens: "09:00", closes: "18:00" },
   ],
   // Год основания — уточнить у клиента; пока null, фраза "на рынке с N года" не показывается.
   sinceYear: null as number | null,
 };
 
 export const navLinks = [
-  { label: "Продукция", href: "#categories" },
+  { label: "Продукция", href: "#products" },
   { label: "Бренды", href: "#brands" },
   { label: "Услуги", href: "#services" },
   { label: "О компании", href: "#about" },

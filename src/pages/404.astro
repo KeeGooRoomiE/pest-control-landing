@@ -1,0 +1,29 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/sections/Header.astro";
+import Footer from "../components/sections/Footer.astro";
+import Container from "../components/ui/Container.astro";
+import Button from "../components/ui/Button.astro";
+
+const home = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/`;
+---
+
+<Layout title="Страница не найдена — QAZ Pest Control" noindex>
+  <Header />
+  <main id="main" tabindex="-1" class="outline-none">
+    <section class="bg-gradient-to-b from-brand-mist to-white pb-24 pt-36 sm:pt-44">
+      <Container class="text-center">
+        <p class="text-sm font-semibold uppercase tracking-[0.14em] text-brand-green">Ошибка 404</p>
+        <h1 class="mx-auto mt-4 max-w-2xl text-4xl font-bold tracking-tight text-ink sm:text-5xl">Такой страницы нет</h1>
+        <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-slate-600">
+          Возможно, ссылка устарела или в ней опечатка. Вернитесь на главную — там вся наша продукция и услуги.
+        </p>
+        <div class="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Button href={home} size="lg" class="w-full sm:w-auto">На главную</Button>
+          <Button href={`${home}#contacts`} variant="secondary" size="lg" class="w-full sm:w-auto">Связаться с нами</Button>
+        </div>
+      </Container>
+    </section>
+  </main>
+  <Footer />
+</Layout>

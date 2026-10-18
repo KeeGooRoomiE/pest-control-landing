@@ -9,11 +9,13 @@ import Brands from "../components/sections/Brands.astro";
 import About from "../components/sections/About.astro";
 import CTAForm from "../components/sections/CTAForm.astro";
 import Footer from "../components/sections/Footer.astro";
+import StructuredData from "../components/seo/StructuredData.astro";
 ---
 
 <Layout>
+  <StructuredData slot="head" />
   <Header />
-  <main>
+  <main id="main" tabindex="-1" class="outline-none">
     <Hero />
     <Services />
     <Categories />
