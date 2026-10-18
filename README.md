@@ -47,6 +47,25 @@ npm run preview   # предпросмотр собранной версии
 
 Пуш в `main` собирает сайт и публикует его на GitHub Pages через `.github/workflows/deploy.yml`. Сейчас сайт живёт на `https://<org>.github.io/pest-control-landing` (`base` в `astro.config.mjs`). Когда клиент передаст доступ к DNS домена — поменять `site`/`base` в `astro.config.mjs`, добавить `public/CNAME`, убрать `base`.
 
+## Свой домен и SEO
+
+Пока сайт на `keegooroomie.github.io/pest-control-landing`. Когда будет домен:
+
+1. В DNS домена направить на GitHub Pages (A-записи GitHub Pages или CNAME на `keegooroomie.github.io`) и положить в `public/CNAME` одну строку — домен (например `example.kz`).
+2. В GitHub → Settings → Secrets and variables → Actions → **Variables** задать `SITE_URL` (`https://example.kz`) и `SITE_BASE` (`/`) — код править не нужно: от них считаются canonical, sitemap, `robots.txt`, Open Graph и JSON-LD.
+3. В Settings → Pages указать Custom domain, включить Enforce HTTPS.
+
+Необязательные переменные (там же, Variables; пока не заданы — соответствующего кода на странице нет):
+
+| Переменная | Что делает |
+| --- | --- |
+| `PUBLIC_GOOGLE_SITE_VERIFICATION` | мета-тег подтверждения Google Search Console |
+| `PUBLIC_YANDEX_VERIFICATION` | мета-тег подтверждения Яндекс Вебмастера |
+| `PUBLIC_YM_ID` | номер счётчика Яндекс Метрики (цели: `phone_click`, `email_click`, `order_click`, `lead_submitted`) |
+| `PUBLIC_GA_ID` | идентификатор GA4 (`G-XXXXXXX`), те же цели |
+
+Перед включением счётчиков решить вопрос с уведомлением о cookie. После выхода на домен — отправить `sitemap-index.xml` в Search Console и Яндекс Вебмастер.
+
 ## Отправка заявок с формы
 
 Форма в блоке "Контакты" не имеет бэкенда (GitHub Pages — статический хостинг). Отправка реализована так:
