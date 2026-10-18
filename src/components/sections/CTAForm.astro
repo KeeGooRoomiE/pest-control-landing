@@ -89,6 +89,9 @@ const fieldClass =
           style="--reveal-delay: 120ms"
         >
           <div class="grid gap-5">
+            <div class="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+              <label>Сайт (не заполняйте) <input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+            </div>
             <div class="grid gap-5 sm:grid-cols-2">
               <label class="block text-sm font-medium text-ink">
                 Имя
@@ -149,9 +152,22 @@ const fieldClass =
   const form = document.querySelector<HTMLFormElement>("[data-lead-form]");
   const status = document.querySelector<HTMLElement>("[data-lead-form-status]");
 
+  // Защита от ботов-автозаполнителей: невидимое поле-ловушка и минимальное время заполнения.
+  // Это не защита от прямой отправки в GitHub API (токен публичен) — см. аудит.
+  const formShownAt = Date.now();
+  const MIN_FILL_MS = 3000;
+
   form?.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!status) return;
+
+    const trap = form.querySelector<HTMLInputElement>('input[name="website"]');
+    if ((trap && trap.value.trim() !== "") || Date.now() - formShownAt < MIN_FILL_MS) {
+      // Делаем вид, что всё отправлено, чтобы бот не подстраивался; заявка при этом не уходит.
+      status.textContent = "Заявка отправлена! Мы свяжемся с вами в ближайшее время.";
+      status.className = "text-sm text-brand-green";
+      return;
+    }
 
     const token = getDispatchToken();
     if (!token) {
@@ -190,6 +206,7 @@ const fieldClass =
 
       status.textContent = "Заявка отправлена! Мы свяжемся с вами в ближайшее время.";
       status.className = "text-sm text-brand-green";
+      document.dispatchEvent(new CustomEvent("lead:submitted"));
       form.reset();
     } catch (error) {
       console.error(error);

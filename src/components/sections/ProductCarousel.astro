@@ -53,7 +53,7 @@ const arrowClass =
                 tabindex="0"
                 aria-haspopup="dialog"
                 data-open-modal={item.id}
-                class="flex cursor-pointer flex-col"
+                class="flex cursor-pointer flex-col rounded-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand-green"
               >
                 <div class="flex h-44 items-center justify-center overflow-hidden rounded-2xl bg-brand-mist p-4">
                   {getImage(item) ? (
@@ -274,7 +274,16 @@ const arrowClass =
 
   document.querySelectorAll<HTMLElement>("[data-carousel]").forEach(initCarousel);
 
+  // Элемент, с которого открыли модалку: после закрытия возвращаем на него фокус.
+  let lastFocused: HTMLElement | null = null;
+
+  const focusableIn = (modal: HTMLElement) =>
+    Array.from(
+      modal.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'),
+    );
+
   function openModal(modal: HTMLElement) {
+    lastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     modal.classList.remove("hidden");
     modal.classList.add("flex");
     document.body.style.overflow = "hidden";
@@ -285,6 +294,8 @@ const arrowClass =
     modal.classList.add("hidden");
     modal.classList.remove("flex");
     document.body.style.overflow = "";
+    lastFocused?.focus();
+    lastFocused = null;
   }
 
   document.querySelectorAll<HTMLElement>("[data-open-modal]").forEach((trigger) => {
@@ -307,6 +318,31 @@ const arrowClass =
       if (event.target === modal) closeModal(modal);
     });
     modal.querySelector("[data-modal-close]")?.addEventListener("click", () => closeModal(modal));
+  });
+
+  // Табуляция внутри открытой модалки не должна уходить на страницу под ней.
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Tab") return;
+    const modal = document.querySelector<HTMLElement>("[data-product-modal].flex");
+    if (!modal) return;
+    const items = focusableIn(modal);
+    if (items.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = items[0];
+    const last = items[items.length - 1];
+    const active = document.activeElement;
+    if (!modal.contains(active)) {
+      event.preventDefault();
+      first.focus();
+    } else if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
   });
 
   document.addEventListener("keydown", (event) => {

@@ -4,6 +4,7 @@ import Container from "../ui/Container.astro";
 import { site, navLinks } from "../../data/site";
 import logo from "../../assets/logo/qaz-pest-control.jpg";
 
+const home = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/`;
 const currentYear = new Date().getFullYear();
 ---
 
@@ -11,7 +12,7 @@ const currentYear = new Date().getFullYear();
   <Container>
     <div class="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
       <div class="max-w-sm">
-        <a href="#hero" class="flex items-center gap-3">
+        <a href={home} class="flex items-center gap-3">
           <Image src={logo} alt="" width={44} height={44} class="h-11 w-11 rounded-lg object-contain" />
           <span class="text-lg font-bold tracking-tight text-ink">{site.companyName}</span>
         </a>
@@ -21,7 +22,7 @@ const currentYear = new Date().getFullYear();
       <nav aria-label="Навигация по сайту">
         <ul class="flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium text-slate-600">
           {navLinks.map((link) => (
-            <li><a href={link.href} class="transition-colors hover:text-brand-green">{link.label}</a></li>
+            <li><a href={`${home}${link.href}`} class="transition-colors hover:text-brand-green">{link.label}</a></li>
           ))}
         </ul>
       </nav>

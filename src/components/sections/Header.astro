@@ -4,6 +4,8 @@ import { site, navLinks } from "../../data/site";
 
 // Файлы из public/ адресуем с учётом `base` (см. astro.config.mjs).
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
+// Якоря ведут на главную: так меню работает и на других страницах (например, 404).
+const home = `${base}/`;
 ---
 
 <header class="fixed inset-x-0 top-0 z-50" data-header>
@@ -12,7 +14,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
     data-header-bar
   >
     <div class="relative mx-auto flex w-full max-w-[96rem] items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-10">
-      <a href="#hero" class="flex shrink-0 items-center gap-3">
+      <a href={home} class="flex shrink-0 items-center gap-3">
         <img
           src={`${base}/icon-192.png`}
           alt=""
@@ -25,7 +27,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 
       <nav class="hidden items-center gap-1 whitespace-nowrap text-sm font-medium text-white/90 xl:flex">
         {navLinks.map((link) => (
-          <a href={link.href} class="rounded-lg px-3.5 py-2 transition-colors hover:bg-white/15 hover:text-white">
+          <a href={`${home}${link.href}`} class="rounded-lg px-3.5 py-2 transition-colors hover:bg-white/15 hover:text-white">
             {link.label}
           </a>
         ))}
@@ -36,7 +38,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
           {site.phone}
         </a>
         <div class="hidden sm:block">
-          <Button href="#contacts" variant="secondary" size="md">Получить консультацию</Button>
+          <Button href={`${home}#contacts`} variant="secondary" size="md">Получить консультацию</Button>
         </div>
 
         <a
@@ -71,12 +73,12 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, "");
       >
         <nav class="grid gap-1 text-base font-medium">
           {navLinks.map((link) => (
-            <a href={link.href} class="rounded-xl px-4 py-3 transition-colors hover:bg-brand-green/10 hover:text-brand-green" data-menu-link>
+            <a href={`${home}${link.href}`} class="rounded-xl px-4 py-3 transition-colors hover:bg-brand-green/10 hover:text-brand-green" data-menu-link>
               {link.label}
             </a>
           ))}
         </nav>
-        <Button href="#contacts" size="lg" class="mt-3 w-full" data-menu-link>Получить консультацию</Button>
+        <Button href={`${home}#contacts`} size="lg" class="mt-3 w-full" data-menu-link>Получить консультацию</Button>
       </div>
     </div>
   </div>
