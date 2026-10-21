@@ -28,4 +28,4 @@ pnpm-debug.log*
 
 # python bot
 __pycache__/
-bot/.venv/
+archive/bot-python/.venv/
