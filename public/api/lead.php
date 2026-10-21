@@ -37,7 +37,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
 
 // --- конфиг ---------------------------------------------------------------
 $configPath = getenv('LEAD_CONFIG') ?: dirname(__DIR__, 2) . '/private/lead-config.php';
-$config = is_file($configPath) ? require $configPath : null;
+// Конфиг без «<?php» в начале PHP вывел бы как текст (с токеном) — такой файл не исполняем.
+$configRaw = is_file($configPath) ? (string) @file_get_contents($configPath) : '';
+$config = null;
+if (str_starts_with(ltrim($configRaw, "\xEF\xBB\xBF \t\r\n"), '<?php')) {
+    ob_start();
+    $config = require $configPath;
+    ob_end_clean();
+}
 if (!is_array($config) || empty($config['bot_token']) || empty($config['chat_id'])) {
     error_log('lead.php: конфиг не найден или не заполнен: ' . $configPath);
     respond(503, ['ok' => false, 'error' => 'not_configured']);

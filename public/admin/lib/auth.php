@@ -9,7 +9,18 @@ function load_config(): ?array
     if (!is_file($path)) {
         return null;
     }
-    $config = require $path;
+    // Конфиг без «<?php» в начале PHP выведет как обычный текст — вместе с токеном. Такой файл не исполняем.
+    $raw = (string) @file_get_contents($path);
+    if (!str_starts_with(ltrim($raw, "\xEF\xBB\xBF \t\r\n"), '<?php')) {
+        error_log('admin: в admin-config.php нет открывающего <?php — файл проигнорирован');
+        return null;
+    }
+    ob_start();
+    try {
+        $config = require $path;
+    } finally {
+        ob_end_clean();
+    }
     foreach (['admin_user', 'admin_password_hash', 'github_token', 'github_repo'] as $key) {
         if (!is_array($config) || !is_string($config[$key] ?? null) || $config[$key] === '') {
             return null;
