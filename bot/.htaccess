@@ -1,0 +1,6 @@
+# Бот: служебный каталог, не индексировать, не кешировать.
+Options -Indexes
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow, noarchive"
+  Header set Cache-Control "no-store"
+</IfModule>
