@@ -144,34 +144,58 @@ $payload = http_build_query([
     'disable_web_page_preview' => 'true',
 ]);
 
-$response = false;
-if (function_exists('curl_init')) {
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => $payload,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT => 10,
-        CURLOPT_CONNECTTIMEOUT => 5,
-    ]);
-    $response = curl_exec($ch);
-    curl_close($ch);
-} else {
-    $context = stream_context_create(['http' => [
-        'method' => 'POST',
-        'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
-        'content' => $payload,
-        'timeout' => 10,
-        'ignore_errors' => true,
-    ]]);
-    $response = @file_get_contents($url, false, $context);
+/**
+ * Один запрос к Telegram. Возвращает [разобранный ответ|null, код ошибки транспорта|0].
+ */
+function telegramSend(string $url, string $payload): array
+{
+    $errno = 0;
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 8,
+            CURLOPT_CONNECTTIMEOUT => 4,
+        ]);
+        $response = curl_exec($ch);
+        $errno = curl_errno($ch);
+        curl_close($ch);
+    } else {
+        $context = stream_context_create(['http' => [
+            'method' => 'POST',
+            'header' => "Content-Type: application/x-www-form-urlencoded\r\n",
+            'content' => $payload,
+            'timeout' => 8,
+            'ignore_errors' => true,
+        ]]);
+        $response = @file_get_contents($url, false, $context);
+    }
+    $decoded = is_string($response) ? json_decode($response, true) : null;
+    return [is_array($decoded) ? $decoded : null, $errno];
 }
 
-$decoded = is_string($response) ? json_decode($response, true) : null;
-if (!is_array($decoded) || ($decoded['ok'] ?? false) !== true) {
+// Telegram изредка не отвечает или отдаёт 5xx/429 — одна повторная попытка через секунду.
+// Постоянные ошибки (неверный токен/чат, 4xx) не повторяем.
+$decoded = null;
+for ($attempt = 1; $attempt <= 2; $attempt++) {
+    [$decoded, $errno] = telegramSend($url, $payload);
+    if (($decoded['ok'] ?? false) === true) {
+        break;
+    }
+    $errorCode = (int) ($decoded['error_code'] ?? 0);
     // токен в лог не пишем
-    error_log('lead.php: Telegram отклонил/не ответил: ' . (is_array($decoded) ? ($decoded['description'] ?? 'unknown') : 'нет ответа'));
-    respond(502, ['ok' => false, 'error' => 'telegram_failed']);
+    error_log(sprintf(
+        'lead.php: Telegram, попытка %d: %s',
+        $attempt,
+        $decoded !== null ? ($errorCode . ' ' . ($decoded['description'] ?? 'unknown')) : ('нет ответа, curl errno ' . $errno)
+    ));
+    $retryable = $decoded === null || $errorCode === 429 || $errorCode >= 500;
+    if ($attempt === 2 || !$retryable) {
+        respond(502, ['ok' => false, 'error' => 'telegram_failed']);
+    }
+    sleep(1);
 }
 
 respond(200, ['ok' => true]);
