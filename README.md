@@ -45,26 +45,43 @@ npm run preview   # предпросмотр собранной версии
 
 ## Деплой
 
-Пуш в `main` собирает сайт и публикует его на GitHub Pages через `.github/workflows/deploy.yml`. Сейчас сайт живёт на `https://<org>.github.io/pest-control-landing` (`base` в `astro.config.mjs`). Когда клиент передаст доступ к DNS домена — поменять `site`/`base` в `astro.config.mjs`, добавить `public/CNAME`, убрать `base`.
+Пуш в `main` запускает `.github/workflows/deploy.yml`: сборка и публикация на GitHub Pages (запасной адрес `https://keegooroomie.github.io/pest-control-landing`) и сборка под боевой домен с публикацией в ветку `production` (см. следующий раздел). Адрес сайта и `base` задаются переменными окружения `SITE_URL`/`SITE_BASE` (`astro.config.mjs`), править код при смене домена не нужно.
 
-## Свой домен и SEO
+## Хостинг (Plesk), домен и SEO
 
-Пока сайт на `keegooroomie.github.io/pest-control-landing`. Когда будет домен:
+Боевой сайт — `https://qazpestcontrol.com`, хостинг Plesk. Публикация:
 
-1. В DNS домена направить на GitHub Pages (A-записи GitHub Pages или CNAME на `keegooroomie.github.io`) и положить в `public/CNAME` одну строку — домен (например `example.kz`).
-2. В GitHub → Settings → Secrets and variables → Actions → **Variables** задать `SITE_URL` (`https://example.kz`) и `SITE_BASE` (`/`) — код править не нужно: от них считаются canonical, sitemap, `robots.txt`, Open Graph и JSON-LD.
-3. В Settings → Pages указать Custom domain, включить Enforce HTTPS.
+```
+git push в main → GitHub Actions:
+   ├─ сборка для GitHub Pages (запасной адрес на github.io)
+   └─ сборка под домен (SITE_BASE=/) → ветка `production` (только готовый сайт)
+Plesk → Git → Pull updates (ветка production) → httpdocs
+```
 
-Необязательные переменные (там же, Variables; пока не заданы — соответствующего кода на странице нет):
+Ветка `production` содержит только собранные файлы (без исходников, `bot/`, `.github/`), её формирует `.github/scripts/publish-production.sh` обычными коммитами (без force-push).
+
+**Разовая настройка Plesk** (Websites & Domains → qazpestcontrol.com):
+
+1. **Git**: репозиторий `https://github.com/KeeGooRoomiE/pest-control-landing.git`, ветка **`production`** (не `main`), каталог развёртывания — корень (`httpdocs`). Режим: автоматический (через webhook, см. ниже) или вручную кнопкой *Pull updates*.
+2. **Очистить `httpdocs`** от того, что скопировано из `main` (`src/`, `bot/`, `.github/`, `package.json`, `CLAUDE.md` и т.д.), и удалить `bitrixsetup.php` и `index.html`-заглушку хостинга — иначе исходники и установщик Bitrix останутся доступны из интернета. `cgi-bin` не трогать.
+3. **SSL/TLS**: выпустить сертификат Let's Encrypt для домена и `www`; затем в *Hosting Settings* включить «Permanent SEO-safe 301 redirect from HTTP to HTTPS» и выбрать предпочитаемый домен (с `www` или без). Редиректы намеренно не вынесены в `.htaccess`, чтобы не сломать сайт до выпуска сертификата.
+4. Автоматическое обновление (необязательно): в Plesk Git скопировать *Webhook URL* и добавить его в GitHub → Settings → Webhooks (событие *push*, ветка production). Если панель Plesk снаружи недоступна — использовать *Pull updates* вручную или расписание (Scheduled Tasks).
+
+`public/.htaccess` (404-страница, кеширование, сжатие, заголовки безопасности) работает в режиме Apache; в режиме «только nginx» его игнорируют — тогда эти директивы задаются в настройках nginx в Plesk.
+
+**GitHub Pages** (`keegooroomie.github.io/pest-control-landing`) остаётся запасным адресом. Когда домен заработает, лучше отключить Pages (Settings → Pages) и убрать задачи `build`/`deploy` из `deploy.yml`, чтобы не было двух копий сайта для поисковиков.
+
+Необязательные переменные (GitHub → Settings → Secrets and variables → Actions → **Variables**; пока не заданы — соответствующего кода на странице нет):
 
 | Переменная | Что делает |
 | --- | --- |
+| `PRODUCTION_SITE_URL` | адрес боевого сайта для canonical/sitemap/OG (по умолчанию `https://qazpestcontrol.com`) |
 | `PUBLIC_GOOGLE_SITE_VERIFICATION` | мета-тег подтверждения Google Search Console |
 | `PUBLIC_YANDEX_VERIFICATION` | мета-тег подтверждения Яндекс Вебмастера |
 | `PUBLIC_YM_ID` | номер счётчика Яндекс Метрики (цели: `phone_click`, `email_click`, `order_click`, `lead_submitted`) |
 | `PUBLIC_GA_ID` | идентификатор GA4 (`G-XXXXXXX`), те же цели |
 
-Перед включением счётчиков решить вопрос с уведомлением о cookie. После выхода на домен — отправить `sitemap-index.xml` в Search Console и Яндекс Вебмастер.
+Перед включением счётчиков решить вопрос с уведомлением о cookie. После запуска домена — отправить `sitemap-index.xml` в Search Console и Яндекс Вебмастер.
 
 ## Отправка заявок с формы
 

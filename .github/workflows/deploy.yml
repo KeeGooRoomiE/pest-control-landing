@@ -63,8 +63,43 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
+  # Сборка под боевой домен и публикация готового сайта в ветку production.
+  # Plesk забирает эту ветку в httpdocs (Git → Pull updates), см. README → "Хостинг (Plesk)".
+  publish-production:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build for production domain
+        env:
+          PUBLIC_GITHUB_DISPATCH_TOKEN: ${{ secrets.PAGES_DISPATCH_TOKEN }}
+          SITE_URL: ${{ vars.PRODUCTION_SITE_URL || 'https://qazpestcontrol.com' }}
+          SITE_BASE: /
+          PUBLIC_YM_ID: ${{ vars.PUBLIC_YM_ID }}
+          PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
+          PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.PUBLIC_GOOGLE_SITE_VERIFICATION }}
+          PUBLIC_YANDEX_VERIFICATION: ${{ vars.PUBLIC_YANDEX_VERIFICATION }}
+        run: npm run build
+
+      - name: Publish dist to production branch
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          .github/scripts/publish-production.sh dist \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            production "deploy: ${GITHUB_SHA::7}"
+
   notify:
-    needs: [build, deploy]
+    needs: [build, deploy, publish-production]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -74,6 +109,7 @@ jobs:
           CHAT_ID:       ${{ secrets.CHAT_ID }}
           BUILD_STATUS:  ${{ needs.build.result }}
           DEPLOY_STATUS: ${{ needs.deploy.result }}
+          PRODUCTION_STATUS: ${{ needs.publish-production.result }}
           SITE_URL:      ${{ needs.deploy.outputs.page_url }}
           ACTOR:         ${{ github.actor }}
           BRANCH:        ${{ github.ref_name }}
@@ -86,8 +122,14 @@ jobs:
 
           SHORT_SHA="${SHA:0:7}"
 
+          if [ "$PRODUCTION_STATUS" != "success" ]; then
+            PROD_LINE="%0A⚠️ Ветка production (qazpestcontrol.com) не обновлена: ${PRODUCTION_STATUS}"
+          else
+            PROD_LINE="%0A🌍 Ветка production обновлена — забрать в Plesk (Pull updates)"
+          fi
+
           if [ "$BUILD_STATUS" = "success" ] && [ "$DEPLOY_STATUS" = "success" ]; then
-            TEXT="@${ACTOR}%0A✅ Deployed successfully!%0ABranch: ${BRANCH}%0ACommit: ${SHORT_SHA}%0A🌐 ${SITE_URL}"
+            TEXT="@${ACTOR}%0A✅ Deployed successfully!%0ABranch: ${BRANCH}%0ACommit: ${SHORT_SHA}%0A🌐 ${SITE_URL}${PROD_LINE}"
           elif [ "$BUILD_STATUS" != "success" ]; then
             TEXT="@${ACTOR}%0A❌ Build failed!%0ABranch: ${BRANCH}%0ACommit: ${SHORT_SHA}"
           else
