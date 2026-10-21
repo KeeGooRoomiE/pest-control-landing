@@ -148,6 +148,9 @@ const fieldClass =
   // значении в локальной сборке гарантированно докажет "токена нет" и вырежет
   // рабочую ветку кода на этапе сборки, ещё до того, как токен попадёт в бандл.
   const getDispatchToken = () => import.meta.env.PUBLIC_GITHUB_DISPATCH_TOKEN ?? "";
+  // Боевой сайт: заявка уходит на собственный обработчик (public/api/lead.php), токенов в странице нет.
+  // Задаётся переменной сборки PUBLIC_LEAD_ENDPOINT (см. deploy.yml). Запасной путь — GitHub dispatch.
+  const getLeadEndpoint = () => import.meta.env.PUBLIC_LEAD_ENDPOINT ?? "";
 
   const form = document.querySelector<HTMLFormElement>("[data-lead-form]");
   const status = document.querySelector<HTMLElement>("[data-lead-form-status]");
@@ -169,8 +172,9 @@ const fieldClass =
       return;
     }
 
+    const endpoint = getLeadEndpoint();
     const token = getDispatchToken();
-    if (!token) {
+    if (!endpoint && !token) {
       status.textContent = "Форма ещё не подключена к отправке (нет токена). Свяжитесь с нами по телефону.";
       status.className = "text-sm text-brand-red";
       return;
@@ -183,26 +187,46 @@ const fieldClass =
     status.className = "text-sm text-slate-500";
 
     try {
-      const response = await fetch(`https://api.github.com/repos/${GITHUB_DISPATCH_REPO}/dispatches`, {
-        method: "POST",
-        headers: {
-          Accept: "application/vnd.github+json",
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          event_type: GITHUB_DISPATCH_EVENT_TYPE,
-          client_payload: {
+      if (endpoint) {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
             name: data.get("name"),
             phone: data.get("phone"),
             objectType: data.get("objectType"),
             comment: data.get("comment"),
-            submittedAt: new Date().toISOString(),
+            website: data.get("website"),
+          }),
+        });
+        if (response.status === 429) {
+          status.textContent = "Слишком много заявок подряд. Попробуйте позже или позвоните нам.";
+          status.className = "text-sm text-brand-red";
+          return;
+        }
+        if (!response.ok) throw new Error(`lead endpoint responded ${response.status}`);
+      } else {
+        const response = await fetch(`https://api.github.com/repos/${GITHUB_DISPATCH_REPO}/dispatches`, {
+          method: "POST",
+          headers: {
+            Accept: "application/vnd.github+json",
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        }),
-      });
+          body: JSON.stringify({
+            event_type: GITHUB_DISPATCH_EVENT_TYPE,
+            client_payload: {
+              name: data.get("name"),
+              phone: data.get("phone"),
+              objectType: data.get("objectType"),
+              comment: data.get("comment"),
+              submittedAt: new Date().toISOString(),
+            },
+          }),
+        });
 
-      if (!response.ok) throw new Error(`GitHub API responded ${response.status}`);
+        if (!response.ok) throw new Error(`GitHub API responded ${response.status}`);
+      }
 
       status.textContent = "Заявка отправлена! Мы свяжемся с вами в ближайшее время.";
       status.className = "text-sm text-brand-green";

@@ -81,7 +81,10 @@ jobs:
 
       - name: Build for production domain
         env:
-          PUBLIC_GITHUB_DISPATCH_TOKEN: ${{ secrets.PAGES_DISPATCH_TOKEN }}
+          # Токен GitHub в боевую сборку НЕ передаём: форма шлёт заявки на public/api/lead.php,
+          # секреты Telegram лежат на сервере (README → "Хостинг"). GitHub к тому же блокирует
+          # пуш файлов с токенами (push protection).
+          PUBLIC_LEAD_ENDPOINT: /api/lead.php
           SITE_URL: ${{ vars.PRODUCTION_SITE_URL || 'https://qazpestcontrol.com' }}
           SITE_BASE: /
           PUBLIC_YM_ID: ${{ vars.PUBLIC_YM_ID }}
@@ -89,6 +92,13 @@ jobs:
           PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.PUBLIC_GOOGLE_SITE_VERIFICATION }}
           PUBLIC_YANDEX_VERIFICATION: ${{ vars.PUBLIC_YANDEX_VERIFICATION }}
         run: npm run build
+
+      - name: Verify no tokens in build output
+        run: |
+          if grep -rEl 'github_pat_[A-Za-z0-9_]{20,}|ghp_[A-Za-z0-9]{30,}|[0-9]{8,10}:AA[A-Za-z0-9_-]{30,}' dist; then
+            echo "::error::В собранном сайте найден токен — публикация остановлена"
+            exit 1
+          fi
 
       - name: Publish dist to production branch
         env:

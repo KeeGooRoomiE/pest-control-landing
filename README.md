@@ -65,7 +65,8 @@ Plesk → Git → Pull updates (ветка production) → httpdocs
 1. **Git**: репозиторий `https://github.com/KeeGooRoomiE/pest-control-landing.git`, ветка **`production`** (не `main`), каталог развёртывания — корень (`httpdocs`). Режим: автоматический (через webhook, см. ниже) или вручную кнопкой *Pull updates*.
 2. **Очистить `httpdocs`** от того, что скопировано из `main` (`src/`, `bot/`, `.github/`, `package.json`, `CLAUDE.md` и т.д.), и удалить `bitrixsetup.php` и `index.html`-заглушку хостинга — иначе исходники и установщик Bitrix останутся доступны из интернета. `cgi-bin` не трогать.
 3. **SSL/TLS**: выпустить сертификат Let's Encrypt для домена и `www`; затем в *Hosting Settings* включить «Permanent SEO-safe 301 redirect from HTTP to HTTPS» и выбрать предпочитаемый домен (с `www` или без). Редиректы намеренно не вынесены в `.htaccess`, чтобы не сломать сайт до выпуска сертификата.
-4. Автоматическое обновление (необязательно): в Plesk Git скопировать *Webhook URL* и добавить его в GitHub → Settings → Webhooks (событие *push*, ветка production). Если панель Plesk снаружи недоступна — использовать *Pull updates* вручную или расписание (Scheduled Tasks).
+4. **Заявки с формы** (`public/api/lead.php`, нужен PHP на домене): создать файл `private/lead-config.php` **в домашней папке хостинга, рядом с `httpdocs`, но не внутри неё** (Файловый менеджер Plesk), по образцу `server/lead-config.example.php`: токен бота `@qaz_pest_bot`, ID группы заказов, разрешённые хосты. Права на файл — только владелец. Без этого файла форма покажет посетителю «Не удалось отправить заявку, позвоните нам», а в логе PHP будет `lead.php: конфиг не найден`.
+5. Автоматическое обновление (необязательно): в Plesk Git скопировать *Webhook URL* и добавить его в GitHub → Settings → Webhooks (событие *push*, ветка production). Если панель Plesk снаружи недоступна — использовать *Pull updates* вручную или расписание (Scheduled Tasks).
 
 `public/.htaccess` (404-страница, кеширование, сжатие, заголовки безопасности) работает в режиме Apache; в режиме «только nginx» его игнорируют — тогда эти директивы задаются в настройках nginx в Plesk.
 
@@ -85,25 +86,22 @@ Plesk → Git → Pull updates (ветка production) → httpdocs
 
 ## Отправка заявок с формы
 
-Форма в блоке "Контакты" не имеет бэкенда (GitHub Pages — статический хостинг). Отправка реализована так:
+У сайта два способа отправки; какой используется, определяет переменная сборки:
 
-1. Форма на клиенте шлёт `POST` на `https://api.github.com/repos/<repo>/dispatches` (`repository_dispatch`) — см. `src/components/sections/CTAForm.astro`.
-2. `.github/workflows/lead-telegram.yml` слушает `repository_dispatch` и отправляет заявку в Telegram-группу через бота (бот заказов `@qaz_pest_bot`, токен — секрет `ORDERS_BOT_TOKEN`; пока его нет, используется бот деплоя; чат заявок можно вынести отдельным секретом `LEADS_CHAT_ID`). Данные из `client_payload` считаются недоверенными — в shell они попадают только через переменные окружения.
-3. Токен для вызова `dispatches` API подставляется Vite/Astro в клиентский JS на этапе сборки (`npm run build` в `deploy.yml`) из переменной окружения `PUBLIC_GITHUB_DISPATCH_TOKEN`, которая берётся из репозиторного секрета `PAGES_DISPATCH_TOKEN` — в исходниках репозитория токена нет (см. `src/components/sections/CTAForm.astro`, `import.meta.env.PUBLIC_GITHUB_DISPATCH_TOKEN`).
+- **Боевой сайт (qazpestcontrol.com)** — `PUBLIC_LEAD_ENDPOINT=/api/lead.php`. Форма шлёт JSON на `public/api/lead.php`, тот проверяет запрос (метод, Origin, размер, honeypot, лимит частоты по IP и общий дневной лимит) и отправляет сообщение в Telegram-группу от имени бота. Токен бота и ID чата лежат только в `private/lead-config.php` на сервере. В публичном JS и в репозитории токенов нет (сборка прерывается, если токен найден в `dist`).
+- **Запасной адрес на GitHub Pages** — форма шлёт `repository_dispatch` в GitHub (`.github/workflows/lead-telegram.yml` → Telegram). Для этого в сборку подставляется публичный fine-grained PAT (`PAGES_DISPATCH_TOKEN`, только этот репозиторий, `Contents: Read and write`). Именно из-за него сборку для Pages нельзя коммитить в репозиторий. Когда Pages будет отключён, токен можно отозвать.
 
-**Важно про безопасность:** после сборки этот токен виден в открытом виде в JS на публичной странице — так и задумано (заказчик в курсе и согласен на этот риск), но именно поэтому:
-- используем **только** fine-grained PAT, выпущенный на один этот репозиторий, с правом **Contents: Read and write** и без доступа к другим репозиториям/организациям;
-- не используем classic PAT с `repo` scope — он даёт доступ ко всем репозиториям аккаунта.
+Локальные проверки без Telegram: `php -S 127.0.0.1:8090 -t public` с `LEAD_CONFIG=путь/к/конфигу.php`, где `telegram_api` указывает на локальный подставной сервер.
 
-### Нужные секреты репозитория (Settings → Secrets and variables → Actions)
+### Секреты и переменные репозитория
 
 | Секрет | Назначение |
 | --- | --- |
-| `PAGES_DISPATCH_TOKEN` | fine-grained PAT только на этот репозиторий, `Contents: Read and write` — подставляется в публичный JS при деплое |
-| `ORDERS_BOT_TOKEN` | токен `@qaz_pest_bot`, от его имени уходят заявки с формы (бот должен быть участником группы) |
-| `PIPLINE_BOT_SECRET` | токен Telegram-бота уведомлений о деплое (и запасной вариант для заявок) |
+| `PAGES_DISPATCH_TOKEN` | fine-grained PAT для запасной отправки через GitHub (только Pages-сборка) |
+| `ORDERS_BOT_TOKEN` | токен `@qaz_pest_bot` для `lead-telegram.yml` |
+| `PIPLINE_BOT_SECRET` | токен бота уведомлений о деплое (и запасной для заявок) |
 | `CHAT_ID` | ID Telegram-группы (заявки и уведомления о деплое) |
-| `LEADS_CHAT_ID` | *необязательно* — отдельная группа только для заявок с формы; если не задан, используется `CHAT_ID` |
+| `LEADS_CHAT_ID` | *необязательно* — отдельная группа только для заявок |
 
 ## Ассеты и контент
 
